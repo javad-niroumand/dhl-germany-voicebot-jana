@@ -2042,27 +2042,29 @@ body {
   pointer-events: none !important;
 }
 
-/* Crisp Clean Portrait Centered Over the Flowing Wave Ribbon (No Blobs) */
+/* Voice Reaction Orb + Flowing Wave Ribbon */
 #janaWebrtcMount .jana-orb-avatar-img {
-  width: 78px !important;
-  height: 78px !important;
+  width: 82px !important;
+  height: 82px !important;
   border-radius: 50% !important;
   object-fit: cover !important;
   display: block !important;
   position: relative !important;
   z-index: 3 !important;
-  border: 2.5px solid rgba(255, 204, 0, 0.78) !important;
+  border: 2.5px solid rgba(255, 204, 0, 0.72) !important;
   box-shadow:
-    0 0 0 4px rgba(16, 16, 20, 0.92),
+    0 0 0 4px rgba(16, 16, 20, 0.9),
     0 10px 26px rgba(0, 0, 0, 0.55) !important;
-  transition: border-color 180ms ease, box-shadow 180ms ease !important;
+  transform: scale(calc(1 + var(--voice-level, 0) * 0.08)) !important;
+  transition: transform 80ms ease-out, border-color 140ms ease, box-shadow 140ms ease !important;
 }
 
 #janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .jana-orb-avatar-img {
   border-color: #ffcc00 !important;
   box-shadow:
-    0 0 0 4px rgba(16, 16, 20, 0.92),
-    0 0 24px rgba(255, 204, 0, 0.35),
+    0 0 0 4px rgba(16, 16, 20, 0.9),
+    0 0 0 calc(7px + var(--voice-level, 0) * 8px) rgba(255, 204, 0, 0.22),
+    0 0 calc(22px + var(--voice-level, 0) * 20px) rgba(212, 5, 17, 0.45),
     0 10px 26px rgba(0, 0, 0, 0.55) !important;
 }
 
@@ -2151,11 +2153,7 @@ body {
 }
 
 #janaWebrtcMount .webrtc_widget_powered_by {
-  order: 99 !important;
-  margin-top: 2px !important;
-  font-size: 9.5px !important;
-  color: #71717a !important;
-  opacity: 0.5 !important;
+  display: none !important;
 }
 
 #janaWebrtcMount .webrtc_widget_transcript_wrapper::-webkit-scrollbar,

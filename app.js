@@ -472,6 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
       smoothedVoiceLevel += (speakingLevel - smoothedVoiceLevel) * (speakingLevel > 0.05 ? 0.28 : 0.14);
       const isSpeaking = smoothedVoiceLevel > 0.05;
       waveOrb.classList.toggle("is-speaking", isSpeaking);
+      waveOrb.style.setProperty("--voice-level", smoothedVoiceLevel.toFixed(3));
 
       if (waveCanvas) {
         drawWaveRibbon(waveCanvas, smoothedVoiceLevel, now);
