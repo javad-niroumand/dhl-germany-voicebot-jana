@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=2" />
+  <link rel="stylesheet" href="./styles.css?v=4" />
 </head>
 <body>
   <!-- Official DHL Yellow Header -->
@@ -490,82 +490,78 @@
   </footer>
 
   <!-- =====================================================================
-       BESPOKE DHL VOICE STUDIO — NATIVE COGNIGY WEBRTC WIDGET (JANA)
+       BESPOKE DHL JANA CONCIERGE — UNIFIED WEBCHAT & WEBRTC VOICE WIDGET
        ===================================================================== -->
   <div class="jana-widget-root" id="janaWidgetRoot">
-    <!-- Floating Voice Capsule Launcher -->
+    <!-- Floating Cute Avatar Launcher -->
     <button
       type="button"
       class="jana-launcher"
       id="janaLauncher"
       aria-expanded="false"
       aria-controls="janaDrawer"
-      aria-label="DHL Sprachassistentin Jana öffnen"
+      aria-label="DHL Assistentin Jana öffnen"
     >
       <span class="jana-launcher-glow" aria-hidden="true"></span>
-      <span class="jana-launcher-orb" aria-hidden="true">
-        <span class="eq-bars">
-          <span></span><span></span><span></span>
-        </span>
+      <span class="jana-launcher-avatar-wrap" aria-hidden="true">
+        <img src="./images/jana-avatar.jpg" alt="" class="jana-launcher-avatar" />
+        <span class="jana-online-ring"></span>
       </span>
       <span class="jana-launcher-text">
-        <strong>Mit Jana sprechen</strong>
-        <small><span class="live-pip"></span>Live Voice · DHL Service</small>
+        <strong>Frag Jana</strong>
+        <small><span class="live-pip"></span>Chat &amp; Sprache · Live</small>
       </span>
       <span class="jana-launcher-arrow" aria-hidden="true">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="18 15 12 9 6 15"/>
         </svg>
       </span>
     </button>
 
-    <!-- Bespoke DHL Voice Studio Console -->
+    <!-- Unified DHL Jana Concierge Console (Chat + Voice) -->
     <section
       class="jana-studio"
       id="janaDrawer"
       role="dialog"
-      aria-label="DHL Sprachassistentin Jana – Live Voice Studio"
+      aria-label="DHL Kundenservice Assistentin Jana – Chat und Sprache"
       hidden
     >
       <div class="jana-studio-accent" aria-hidden="true"></div>
 
-      <!-- Studio Top Bar -->
+      <!-- Unified Header with Cute DHL Avatar -->
       <header class="jana-studio-head">
         <div class="jana-studio-identity">
-          <div class="jana-studio-badge" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-              <line x1="12" y1="19" x2="12" y2="22"/>
-            </svg>
+          <div class="jana-head-avatar-wrap">
+            <img src="./images/jana-avatar.jpg" alt="Jana – DHL Assistentin" class="jana-head-avatar" />
+            <span class="jana-head-online" id="janaStatusDot" aria-hidden="true"></span>
           </div>
           <div class="jana-studio-meta">
             <div class="jana-studio-title-row">
               <h2 class="jana-studio-title">Jana</h2>
-              <span class="jana-studio-tag">DHL Voice AI</span>
+              <span class="jana-studio-tag">DHL Service</span>
             </div>
             <p class="jana-studio-status" id="janaStatusText">
-              <span class="status-dot" id="janaStatusDot" aria-hidden="true"></span>
-              <span>Bereit · Natürliche Sprachassistenz</span>
+              <span>Online · Chat &amp; Sprachassistenz</span>
             </p>
           </div>
         </div>
 
         <div class="jana-studio-controls">
           <a
-            href="https://static-trial.cognigy.ai/webrtc/?token=9d56470dd93dd948a98bfdae06c67795e4590865551db81e821e5207b26b0bb9"
+            href="https://webchat-trial.cognigy.ai/v3/4347a89d2a38449e9b77ae96a3145b66f15050b66b771dfbb5e6665583f97979"
             target="_blank"
             rel="noopener noreferrer"
             class="jana-icon-btn"
+            id="janaExternalLink"
             title="Im Vollbild öffnen"
-            aria-label="WebRTC in neuem Tab öffnen"
+            aria-label="In neuem Tab öffnen"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
               <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
             </svg>
           </a>
-          <button type="button" class="jana-icon-btn" id="janaCloseBtn" aria-label="Voice Studio schließen">
+          <button type="button" class="jana-icon-btn" id="janaCloseBtn" aria-label="Assistent schließen">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -573,38 +569,142 @@
         </div>
       </header>
 
-      <!-- Native Cognigy WebRTC Stage (seamlessly restyled) -->
-      <div class="jana-studio-stage" id="janaWebrtcMount">
-        <div class="jana-stage-loader" id="janaStageLoader">
-          <div class="jana-orb-loader" aria-hidden="true">
-            <span class="orb-ring"></span>
-            <span class="orb-core"></span>
-          </div>
-          <p>Verbinde Voice-Engine…</p>
-        </div>
+      <!-- Sleek Segmented Channel Switcher: Chat | Sprache -->
+      <div class="jana-mode-bar" role="tablist" aria-label="Kanal wählen">
+        <button
+          type="button"
+          class="jana-mode-tab is-active"
+          id="janaTabChat"
+          role="tab"
+          aria-selected="true"
+          aria-controls="janaChatPanel"
+          data-mode="chat"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>Webchat</span>
+        </button>
+        <button
+          type="button"
+          class="jana-mode-tab"
+          id="janaTabVoice"
+          role="tab"
+          aria-selected="false"
+          aria-controls="janaVoicePanel"
+          data-mode="voice"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="22"/>
+          </svg>
+          <span>Sprache (Live)</span>
+        </button>
       </div>
 
-      <!-- Compact Quick-Test Tracking Strip -->
-      <footer class="jana-studio-foot">
-        <div class="jana-foot-head">
-          <span class="jana-foot-label">Test-Sendungsnummern zum Ansagen</span>
-          <span class="jana-foot-hint" id="janaCopyHint">Klick kopiert</span>
+      <!-- ===================== CHANNEL 1: WEBCHAT ===================== -->
+      <div class="jana-panel" id="janaChatPanel" role="tabpanel" aria-labelledby="janaTabChat">
+        <div class="jana-chat-scroll" id="janaChatMessages" aria-live="polite">
+          <!-- Welcome Card with Cute Jana Avatar -->
+          <div class="jana-chat-welcome">
+            <img src="./images/jana-avatar.jpg" alt="Jana" class="jana-welcome-avatar" />
+            <h3>Hallo! Ich bin Jana</h3>
+            <p>Ihre digitale DHL Kundenservice-Assistentin. Schreiben Sie mir Ihre Sendungsnummer oder Frage – ich helfe sofort.</p>
+          </div>
+
+          <!-- Starter Quick Actions -->
+          <div class="jana-starters" id="janaChatStarters">
+            <button type="button" class="jana-starter-btn" data-prompt="Wo ist mein Paket 825643754000?">
+              <span class="chip-dot is-red"></span>
+              Status 825643754000 (Nachforschung)
+            </button>
+            <button type="button" class="jana-starter-btn" data-prompt="Wie ist der Status meiner Sendung 003404302811?">
+              <span class="chip-dot is-green"></span>
+              Status 003404302811 (Zustellung)
+            </button>
+            <button type="button" class="jana-starter-btn" data-prompt="Mein Paket 003404348888 liegt nicht am Ablageort">
+              <span class="chip-dot is-amber"></span>
+              Ablageort 003404348888 prüfen
+            </button>
+          </div>
         </div>
-        <div class="jana-chip-row">
-          <button type="button" class="jana-chip" data-copy="825643754000" title="PLZ 06188 – Scanabriss (Nachforschung)">
-            <span class="chip-dot is-red"></span>825643754000 <em>NaFo</em>
-          </button>
-          <button type="button" class="jana-chip" data-copy="003404302811" title="PLZ 54411 – In Zustellung">
-            <span class="chip-dot is-green"></span>003404302811 <em>Live</em>
-          </button>
-          <button type="button" class="jana-chip" data-copy="003404348888" title="PLZ 59457 – Ablageort">
-            <span class="chip-dot is-amber"></span>003404348888 <em>Ablage</em>
-          </button>
+
+        <!-- Typing Indicator -->
+        <div class="jana-typing" id="janaTypingIndicator" hidden>
+          <img src="./images/jana-avatar.jpg" alt="" class="jana-msg-avatar" />
+          <div class="jana-typing-dots" aria-label="Jana schreibt">
+            <span></span><span></span><span></span>
+          </div>
         </div>
-      </footer>
+
+        <!-- Sleek Chat Composer -->
+        <form class="jana-composer" id="janaChatForm" autocomplete="off">
+          <input
+            type="text"
+            id="janaChatInput"
+            class="jana-composer-input"
+            placeholder="Nachricht an Jana schreiben…"
+            aria-label="Nachricht an Jana"
+            maxlength="500"
+          />
+          <button
+            type="button"
+            class="jana-composer-mic"
+            id="janaSwitchToVoiceBtn"
+            title="Stattdessen sprechen"
+            aria-label="Zu Sprachanruf wechseln"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </button>
+          <button type="submit" class="jana-composer-send" aria-label="Nachricht senden">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- ===================== CHANNEL 2: LIVE VOICE (WEBRTC) ===================== -->
+      <div class="jana-panel" id="janaVoicePanel" role="tabpanel" aria-labelledby="janaTabVoice" hidden>
+        <div class="jana-studio-stage" id="janaWebrtcMount">
+          <div class="jana-stage-loader" id="janaStageLoader">
+            <div class="jana-orb-loader" aria-hidden="true">
+              <span class="orb-ring"></span>
+              <img src="./images/jana-avatar.jpg" alt="" class="orb-avatar" />
+            </div>
+            <p>Verbinde Voice-Engine…</p>
+          </div>
+        </div>
+
+        <!-- Compact Quick-Test Tracking Strip for Voice -->
+        <footer class="jana-studio-foot">
+          <div class="jana-foot-head">
+            <span class="jana-foot-label">Test-Sendungsnummern zum Ansagen</span>
+            <span class="jana-foot-hint" id="janaCopyHint">Klick kopiert</span>
+          </div>
+          <div class="jana-chip-row">
+            <button type="button" class="jana-chip" data-copy="825643754000" title="PLZ 06188 – Scanabriss (Nachforschung)">
+              <span class="chip-dot is-red"></span>825643754000 <em>NaFo</em>
+            </button>
+            <button type="button" class="jana-chip" data-copy="003404302811" title="PLZ 54411 – In Zustellung">
+              <span class="chip-dot is-green"></span>003404302811 <em>Live</em>
+            </button>
+            <button type="button" class="jana-chip" data-copy="003404348888" title="PLZ 59457 – Ablageort">
+              <span class="chip-dot is-amber"></span>003404348888 <em>Ablage</em>
+            </button>
+          </div>
+        </footer>
+      </div>
     </section>
   </div>
 
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" defer></script>
   <script src="https://static-trial.cognigy.ai/webrtc/webRTCWidget.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
