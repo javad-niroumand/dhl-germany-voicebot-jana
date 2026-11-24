@@ -58,20 +58,113 @@ const CALC_PRODUCTS = {
   "20": { name: "Paket 20 kg", price: "18,99 €", tracking: true, insurance: true },
 };
 
+const COGNIGY_WEBRTC_ENDPOINT =
+  "https://endpoint-trial.cognigy.ai/9d56470dd93dd948a98bfdae06c67795e4590865551db81e821e5207b26b0bb9";
+const COGNIGY_WEBRTC_FALLBACK_URL =
+  "https://static-trial.cognigy.ai/webrtc/?token=9d56470dd93dd948a98bfdae06c67795e4590865551db81e821e5207b26b0bb9";
+
 document.addEventListener("DOMContentLoaded", () => {
   const launcher = document.getElementById("janaLauncher");
   const drawer = document.getElementById("janaDrawer");
   const closeBtn = document.getElementById("janaCloseBtn");
-  const iframe = document.getElementById("janaWebrtcFrame");
+  const mountEl = document.getElementById("janaWebrtcMount");
+  const loaderEl = document.getElementById("janaStageLoader");
+  const statusTextEl = document.getElementById("janaStatusText");
+  const copyHintEl = document.getElementById("janaCopyHint");
+
+  let webrtcInitialized = false;
+  let webrtcInitializing = false;
+
+  function updateStudioStatus(isCalling) {
+    if (!statusTextEl) return;
+    if (isCalling) {
+      statusTextEl.innerHTML =
+        '<span class="status-dot is-live" aria-hidden="true"></span><span>Live verbunden · Spricht mit Jana</span>';
+    } else {
+      statusTextEl.innerHTML =
+        '<span class="status-dot" aria-hidden="true"></span><span>Bereit · Natürliche Sprachassistenz</span>';
+    }
+  }
+
+  function observeCallState(container) {
+    const observer = new MutationObserver(() => {
+      const calling = Boolean(
+        container.querySelector(".webrtc_widget_content_container_calling, .webrtc_widget_end_call_button")
+      );
+      updateStudioStatus(calling);
+    });
+    observer.observe(container, { childList: true, subtree: true, attributes: true });
+  }
+
+  async function mountNativeWebRTC() {
+    if (webrtcInitialized || webrtcInitializing) return;
+    webrtcInitializing = true;
+
+    // Wait up to 4 seconds for the ES module script to register window.initWebRTCWidget
+    const deadline = Date.now() + 4000;
+    while (typeof window.initWebRTCWidget !== "function" && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 120));
+    }
+
+    if (typeof window.initWebRTCWidget !== "function") {
+      webrtcInitializing = false;
+      if (loaderEl) {
+        loaderEl.innerHTML = `
+          <div class="jana-stage-fallback">
+            <p>Die Voice-Engine konnte im Fenster nicht geladen werden.</p>
+            <a href="${COGNIGY_WEBRTC_FALLBACK_URL}" target="_blank" rel="noopener noreferrer" class="btn-dhl-red">
+              Direkt mit Jana sprechen ↗
+            </a>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    try {
+      await window.initWebRTCWidget(COGNIGY_WEBRTC_ENDPOINT, {});
+      // Cognigy appends a host <div> containing .webrtc_widget_outer_wrapper to document.body.
+      // Move that wrapper seamlessly inside our Voice Studio stage.
+      let wrapper = null;
+      for (let i = 0; i < 25; i++) {
+        wrapper = document.querySelector(".webrtc_widget_outer_wrapper");
+        if (wrapper) break;
+        await new Promise((r) => setTimeout(r, 100));
+      }
+
+      if (wrapper && mountEl) {
+        const host = wrapper.parentElement;
+        if (host && host !== mountEl && host.parentElement === document.body) {
+          mountEl.appendChild(host);
+        } else {
+          mountEl.appendChild(wrapper);
+        }
+        if (loaderEl) loaderEl.hidden = true;
+        observeCallState(mountEl);
+        webrtcInitialized = true;
+      }
+    } catch {
+      if (loaderEl) {
+        loaderEl.innerHTML = `
+          <div class="jana-stage-fallback">
+            <p>Verbindung zur Voice-Engine unterbrochen.</p>
+            <a href="${COGNIGY_WEBRTC_FALLBACK_URL}" target="_blank" rel="noopener noreferrer" class="btn-dhl-red">
+              Im Vollbild starten ↗
+            </a>
+          </div>
+        `;
+      }
+    } finally {
+      webrtcInitializing = false;
+    }
+  }
 
   function openJanaWidget() {
-    if (iframe && !iframe.src && iframe.dataset.src) {
-      iframe.src = iframe.dataset.src;
-    }
     drawer.hidden = false;
     launcher.hidden = true;
     launcher.setAttribute("aria-expanded", "true");
     closeBtn.focus();
+    mountNativeWebRTC();
   }
 
   function closeJanaWidget() {
@@ -94,16 +187,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Quick copy chips inside Jana drawer
+  // Quick copy chips inside Jana Voice Studio (also syncs tracking bar)
   document.querySelectorAll(".jana-chip").forEach((chip) => {
     chip.addEventListener("click", () => {
       const code = chip.dataset.copy;
       if (navigator.clipboard && code) {
         navigator.clipboard.writeText(code).catch(() => {});
       }
-      const orig = chip.textContent;
-      chip.textContent = "Kopiert: " + code;
-      setTimeout(() => { chip.textContent = orig; }, 1400);
+      if (copyHintEl) {
+        copyHintEl.textContent = "Kopiert: " + code + " ✓";
+        copyHintEl.classList.add("is-copied");
+        setTimeout(() => {
+          copyHintEl.textContent = "Klick kopiert";
+          copyHintEl.classList.remove("is-copied");
+        }, 1800);
+      }
     });
   });
 

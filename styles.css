@@ -983,64 +983,99 @@ body {
 }
 
 /* ==========================================================================
-   BESPOKE DHL VOICEBOT JANA — FLOATING WEBRTC WIDGET
+   BESPOKE DHL VOICE STUDIO — NATIVE COGNIGY WEBRTC WIDGET (JANA)
    ========================================================================== */
 .jana-widget-root {
   position: fixed;
   right: 24px;
   bottom: 24px;
   z-index: 90;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* --- Floating Voice Capsule Launcher --- */
 .jana-launcher {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, #ffcc00 0%, #ffda3b 100%);
-  color: #111111;
-  border: 2px solid #d40511;
+  background: rgba(18, 18, 22, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 204, 0, 0.45);
   border-radius: 999px;
-  padding: 10px 20px 10px 12px;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+  padding: 8px 18px 8px 8px;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 0 28px rgba(255, 204, 0, 0.14);
   cursor: pointer;
   font: inherit;
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 220ms ease,
+              box-shadow 220ms ease;
 }
 
 .jana-launcher:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  transform: translateY(-3px);
+  border-color: rgba(255, 204, 0, 0.9);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.65),
+    0 0 36px rgba(255, 204, 0, 0.24);
 }
 
 .jana-launcher[hidden] {
   display: none;
 }
 
-.jana-launcher-pulse {
+.jana-launcher-glow {
   position: absolute;
-  inset: -4px;
+  inset: -3px;
   border-radius: 999px;
-  border: 2px solid rgba(255, 204, 0, 0.55);
-  animation: janaPulse 2.4s ease-out infinite;
+  border: 1.5px solid rgba(255, 204, 0, 0.45);
+  animation: janaPulse 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
   pointer-events: none;
 }
 
 @keyframes janaPulse {
-  0% { transform: scale(1); opacity: 0.7; }
-  100% { transform: scale(1.08, 1.24); opacity: 0; }
+  0% { transform: scale(1); opacity: 0.65; }
+  100% { transform: scale(1.06, 1.24); opacity: 0; }
 }
 
-.jana-launcher-icon {
-  width: 42px;
-  height: 42px;
+.jana-launcher-orb {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #d40511;
-  color: #ffffff;
+  background: radial-gradient(circle at 30% 25%, #ff2b37 0%, #d40511 65%, #990009 100%);
+  box-shadow: 0 4px 16px rgba(212, 5, 17, 0.55), 0 0 0 2px rgba(255, 204, 0, 0.85);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.eq-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+}
+
+.eq-bars span {
+  width: 3px;
+  border-radius: 99px;
+  background: #ffffff;
+  animation: eqBounce 1.15s ease-in-out infinite;
+}
+
+.eq-bars span:nth-child(1) { height: 8px; animation-delay: 0s; }
+.eq-bars span:nth-child(2) { height: 16px; animation-delay: 0.18s; }
+.eq-bars span:nth-child(3) { height: 10px; animation-delay: 0.36s; }
+
+@keyframes eqBounce {
+  0%, 100% { transform: scaleY(0.55); opacity: 0.8; }
+  50% { transform: scaleY(1.15); opacity: 1; }
 }
 
 .jana-launcher-text {
@@ -1051,95 +1086,158 @@ body {
 }
 
 .jana-launcher-text strong {
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
 }
 
 .jana-launcher-text small {
   font-size: 11px;
-  font-weight: 600;
-  color: #3a2d00;
+  font-weight: 500;
+  color: #cfcfd6;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
 }
 
-/* Expanded Floating Voice Drawer */
-.jana-drawer {
-  width: 400px;
+.live-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  display: inline-block;
+}
+
+.jana-launcher-arrow {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffcc00;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+}
+
+/* --- Expanded DHL Voice Studio Console --- */
+.jana-studio {
+  width: 380px;
   max-width: calc(100vw - 24px);
-  height: 610px;
-  max-height: calc(100vh - 48px);
-  background: #ffffff;
-  color: #111111;
-  border-radius: 18px;
+  max-height: calc(100vh - 40px);
+  background: linear-gradient(180deg, #17171c 0%, #101014 100%);
+  color: #f4f4f6;
+  border-radius: 24px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-widget);
-  border: 1px solid rgba(255, 204, 0, 0.65);
-  animation: drawerIn 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 204, 0, 0.28);
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.72),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  animation: studioIn 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.jana-drawer[hidden] {
+.jana-studio[hidden] {
   display: none;
 }
 
-@keyframes drawerIn {
-  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+@keyframes studioIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.jana-drawer-head {
-  background: linear-gradient(90deg, #ffcc00 0%, #ffe066 100%);
-  border-bottom: 3px solid #d40511;
-  padding: 14px 16px;
+.jana-studio-accent {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #ffcc00 0%, #ffda3b 55%, #d40511 100%);
+}
+
+/* Studio Header */
+.jana-studio-head {
+  padding: 16px 18px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.jana-brand-meta {
+.jana-studio-identity {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.jana-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #ffffff;
-  display: flex;
+.jana-studio-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #ffcc00 0%, #ffdd4d 100%);
+  color: #111111;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 6px 18px rgba(255, 204, 0, 0.26);
+  flex-shrink: 0;
 }
 
-.jana-title {
+.jana-studio-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jana-studio-title {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
-  color: #111111;
+  letter-spacing: -0.02em;
+  color: #ffffff;
 }
 
-.jana-subtitle {
-  margin: 2px 0 0;
+.jana-studio-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 204, 0, 0.14);
+  color: #ffcc00;
+  border: 1px solid rgba(255, 204, 0, 0.28);
+}
+
+.jana-studio-status {
+  margin: 3px 0 0;
   font-size: 12px;
-  font-weight: 600;
-  color: #3a2d00;
+  font-weight: 500;
+  color: #a1a1aa;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: #16a34a;
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
   display: inline-block;
+  flex-shrink: 0;
 }
 
-.jana-head-actions {
+.status-dot.is-live {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.85);
+}
+
+.jana-studio-controls {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1148,72 +1246,403 @@ body {
 .jana-icon-btn {
   width: 34px;
   height: 34px;
-  border-radius: 8px;
-  border: 0;
-  background: rgba(0, 0, 0, 0.08);
-  color: #111111;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #d4d4d8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   text-decoration: none;
-  transition: background-color 160ms ease;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 .jana-icon-btn:hover {
-  background: rgba(0, 0, 0, 0.16);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.jana-quick-bar {
-  background: #f7f7f7;
-  border-bottom: 1px solid #e5e5e5;
-  padding: 10px 14px;
+/* --- Native Cognigy WebRTC Stage --- */
+.jana-studio-stage {
+  position: relative;
+  min-height: 340px;
+  max-height: 430px;
+  overflow-y: auto;
+  padding: 20px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 204, 0, 0.11) 0%, rgba(212, 5, 17, 0.05) 38%, transparent 72%),
+    transparent;
 }
 
-.jana-quick-caption {
-  display: block;
-  font-size: 11px;
+.jana-stage-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: #a1a1aa;
+  font-size: 13px;
+  text-align: center;
+}
+
+.jana-stage-loader[hidden] {
+  display: none !important;
+}
+
+.jana-orb-loader {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jana-orb-loader .orb-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 204, 0, 0.2);
+  border-top-color: #ffcc00;
+  animation: spinOrb 1s linear infinite;
+}
+
+.jana-orb-loader .orb-core {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff2b37 0%, #d40511 100%);
+  box-shadow: 0 0 24px rgba(212, 5, 17, 0.55);
+}
+
+@keyframes spinOrb {
+  to { transform: rotate(360deg); }
+}
+
+.jana-stage-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 12px;
+}
+
+.jana-stage-fallback p {
+  margin: 0;
+  font-size: 13px;
+  color: #a1a1aa;
+}
+
+/* ==========================================================================
+   DEEP RESTYLING OF NATIVE COGNIGY WEBRTC WIDGET INSIDE VOICE STUDIO
+   ========================================================================== */
+#janaWebrtcMount > div:not([hidden]) {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+#janaWebrtcMount .webrtc_widget_outer_wrapper {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 1 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+#janaWebrtcMount .webrtc_widget_container {
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 4px 0 0 !important;
+  color: #f4f4f6 !important;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+#janaWebrtcMount .webrtc_widget_content_container {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+  text-align: center !important;
+}
+
+#janaWebrtcMount .webrtc_widget_content_stack,
+#janaWebrtcMount .webrtc_widget_content {
+  background: transparent !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 6px !important;
+}
+
+#janaWebrtcMount .webrtc_widget_avatar,
+#janaWebrtcMount .webrtc_widget_avatar_default {
+  width: 84px !important;
+  height: 84px !important;
+  margin: 0 auto 4px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 30% 25%, #ffe159 0%, #ffcc00 62%, #e6a800 100%) !important;
+  color: #111111 !important;
+  border: 3px solid rgba(255, 204, 0, 0.45) !important;
+  box-shadow:
+    0 0 0 10px rgba(255, 204, 0, 0.08),
+    0 14px 34px rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#janaWebrtcMount .webrtc_widget_avatar svg,
+#janaWebrtcMount .webrtc_widget_avatar svg * {
+  stroke: #111111 !important;
+  color: #111111 !important;
+}
+
+#janaWebrtcMount .webrtc_widget_avatar svg [fill]:not([fill="none"]) {
+  fill: #111111 !important;
+}
+
+#janaWebrtcMount .webrtc_widget_agent_name {
+  display: block !important;
+  width: 100% !important;
+  color: #ffffff !important;
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+}
+
+#janaWebrtcMount .webrtc_widget_tagline,
+#janaWebrtcMount .webrtc_widget_content_label,
+#janaWebrtcMount .webrtc_widget_connecting_text {
+  display: block !important;
+  width: 100% !important;
+  max-width: 280px !important;
+  color: #a1a1aa !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  text-align: center !important;
+  margin: 0 auto !important;
+}
+
+#janaWebrtcMount .webrtc_widget_call_duration {
+  color: #ffcc00 !important;
+  font-variant-numeric: tabular-nums !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  background: rgba(255, 204, 0, 0.1) !important;
+  border: 1px solid rgba(255, 204, 0, 0.25) !important;
+  padding: 4px 14px !important;
+  border-radius: 999px !important;
+}
+
+#janaWebrtcMount .webrtc_widget_call_controls_container,
+#janaWebrtcMount .webrtc_widget_call_actions {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+  margin-top: 8px !important;
+}
+
+#janaWebrtcMount .webrtc_widget_call_button,
+#janaWebrtcMount .webrtc_widget_content_call_button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  min-width: 210px !important;
+  height: 50px !important;
+  background: linear-gradient(135deg, #e60a17 0%, #d40511 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 999px !important;
+  padding: 0 28px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em !important;
+  box-shadow: 0 12px 28px rgba(212, 5, 17, 0.45) !important;
+  transition: transform 180ms ease, box-shadow 180ms ease !important;
+  cursor: pointer !important;
+}
+
+#janaWebrtcMount .webrtc_widget_call_button::after {
+  content: "Anruf starten";
+  font-size: 14px;
   font-weight: 700;
-  color: #555555;
-  margin-bottom: 6px;
+  color: #ffffff;
 }
 
-.jana-quick-chips {
+#janaWebrtcMount .webrtc_widget_call_button:hover,
+#janaWebrtcMount .webrtc_widget_content_call_button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 16px 36px rgba(212, 5, 17, 0.6) !important;
+}
+
+#janaWebrtcMount .webrtc_widget_mute_button {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 50% !important;
+}
+
+#janaWebrtcMount .webrtc_widget_end_call_button {
+  background: #d40511 !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  box-shadow: 0 8px 20px rgba(212, 5, 17, 0.45) !important;
+}
+
+#janaWebrtcMount .webrtc_widget_transcript_section,
+#janaWebrtcMount .webrtc_widget_transcript_wrapper {
+  width: 100% !important;
+  max-height: 165px !important;
+  overflow-y: auto !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 14px !important;
+  padding: 10px 12px !important;
+  margin-top: 8px !important;
+}
+
+#janaWebrtcMount .webrtc_transcript_bubble {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #f4f4f6 !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+#janaWebrtcMount .webrtc_transcript_agent_name {
+  color: #ffcc00 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+#janaWebrtcMount .webrtc_widget_powered_by {
+  margin-top: 10px !important;
+  font-size: 10px !important;
+  color: #71717a !important;
+  opacity: 0.75 !important;
+}
+
+#janaWebrtcMount .webrtc_widget_powered_by a {
+  color: #a1a1aa !important;
+}
+
+/* --- Compact Studio Footer (Quick Test Shipments) --- */
+.jana-studio-foot {
+  padding: 12px 16px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.jana-foot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.jana-foot-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a1a1aa;
+}
+
+.jana-foot-hint {
+  font-size: 10px;
+  font-weight: 600;
+  color: #71717a;
+}
+
+.jana-foot-hint.is-copied {
+  color: #ffcc00;
+}
+
+.jana-chip-row {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
 .jana-chip {
-  background: #ffffff;
-  border: 1px solid #d4d4d4;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  padding: 4px 10px;
+  padding: 5px 10px;
   font: inherit;
   font-size: 11px;
-  font-weight: 700;
-  color: #222222;
+  font-weight: 600;
+  color: #e4e4e7;
   cursor: pointer;
-  transition: border-color 150ms ease, background-color 150ms ease;
+  transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
+}
+
+.jana-chip em {
+  font-style: normal;
+  color: #a1a1aa;
+  font-weight: 500;
 }
 
 .jana-chip:hover {
-  border-color: #d40511;
-  background: #fff8dc;
+  border-color: rgba(255, 204, 0, 0.65);
+  background: rgba(255, 204, 0, 0.1);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
-.jana-iframe-shell {
-  flex: 1;
-  background: #ffffff;
-  position: relative;
+.chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.jana-iframe-shell iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-}
+.chip-dot.is-red { background: #ef4444; }
+.chip-dot.is-green { background: #22c55e; }
+.chip-dot.is-amber { background: #f59e0b; }
 
 /* ==========================================================================
    RESPONSIVE & REDUCED MOTION
@@ -1235,10 +1664,11 @@ body {
     grid-template-columns: 1fr;
   }
   .jana-widget-root { right: 12px; bottom: 12px; }
+  .jana-studio { width: calc(100vw - 24px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .jana-launcher-pulse { animation: none; display: none; }
-  .jana-drawer { animation: none; }
+  .jana-launcher-glow, .eq-bars span, .jana-orb-loader .orb-ring { animation: none; }
+  .jana-studio { animation: none; }
   * { transition: none !important; scroll-behavior: auto !important; }
 }

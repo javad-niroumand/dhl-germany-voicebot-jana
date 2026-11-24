@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=2" />
 </head>
 <body>
   <!-- Official DHL Yellow Header -->
@@ -490,104 +490,122 @@
   </footer>
 
   <!-- =====================================================================
-       BESPOKE DHL VOICEBOT JANA — FLOATING WEBRTC WIDGET
-       Designed with UI/UX Pro Max & Taste principles
+       BESPOKE DHL VOICE STUDIO — NATIVE COGNIGY WEBRTC WIDGET (JANA)
        ===================================================================== -->
   <div class="jana-widget-root" id="janaWidgetRoot">
-    <!-- Floating Trigger Dock (Collapsed) -->
+    <!-- Floating Voice Capsule Launcher -->
     <button
       type="button"
       class="jana-launcher"
       id="janaLauncher"
       aria-expanded="false"
       aria-controls="janaDrawer"
-      aria-label="Jana Sprachassistentin öffnen"
+      aria-label="DHL Sprachassistentin Jana öffnen"
     >
-      <span class="jana-launcher-pulse" aria-hidden="true"></span>
-      <span class="jana-launcher-icon" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="9" y="2" width="6" height="12" rx="3"/>
-          <path d="M5 10a7 7 0 0 0 14 0"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-        </svg>
+      <span class="jana-launcher-glow" aria-hidden="true"></span>
+      <span class="jana-launcher-orb" aria-hidden="true">
+        <span class="eq-bars">
+          <span></span><span></span><span></span>
+        </span>
       </span>
       <span class="jana-launcher-text">
-        <strong>Jana fragen</strong>
-        <small>DHL Sprachassistentin · Live</small>
+        <strong>Mit Jana sprechen</strong>
+        <small><span class="live-pip"></span>Live Voice · DHL Service</small>
+      </span>
+      <span class="jana-launcher-arrow" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="18 15 12 9 6 15"/>
+        </svg>
       </span>
     </button>
 
-    <!-- Expanded Bespoke WebRTC Voice Drawer -->
+    <!-- Bespoke DHL Voice Studio Console -->
     <section
-      class="jana-drawer"
+      class="jana-studio"
       id="janaDrawer"
       role="dialog"
-      aria-label="DHL Sprachassistentin Jana WebRTC"
+      aria-label="DHL Sprachassistentin Jana – Live Voice Studio"
       hidden
     >
-      <header class="jana-drawer-head">
-        <div class="jana-brand-meta">
-          <div class="jana-avatar" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D40511" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="jana-studio-accent" aria-hidden="true"></div>
+
+      <!-- Studio Top Bar -->
+      <header class="jana-studio-head">
+        <div class="jana-studio-identity">
+          <div class="jana-studio-badge" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
               <line x1="12" y1="19" x2="12" y2="22"/>
             </svg>
           </div>
-          <div>
-            <h2 class="jana-title">Jana – DHL Kundenservice</h2>
-            <p class="jana-subtitle">
-              <span class="status-dot" aria-hidden="true"></span>
-              Sprachassistentin · ElevenLabs Live
+          <div class="jana-studio-meta">
+            <div class="jana-studio-title-row">
+              <h2 class="jana-studio-title">Jana</h2>
+              <span class="jana-studio-tag">DHL Voice AI</span>
+            </div>
+            <p class="jana-studio-status" id="janaStatusText">
+              <span class="status-dot" id="janaStatusDot" aria-hidden="true"></span>
+              <span>Bereit · Natürliche Sprachassistenz</span>
             </p>
           </div>
         </div>
-        <div class="jana-head-actions">
+
+        <div class="jana-studio-controls">
           <a
             href="https://static-trial.cognigy.ai/webrtc/?token=9d56470dd93dd948a98bfdae06c67795e4590865551db81e821e5207b26b0bb9"
             target="_blank"
             rel="noopener noreferrer"
             class="jana-icon-btn"
-            title="In neuem Tab öffnen"
+            title="Im Vollbild öffnen"
             aria-label="WebRTC in neuem Tab öffnen"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
               <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
             </svg>
           </a>
-          <button type="button" class="jana-icon-btn" id="janaCloseBtn" aria-label="Schließen">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <button type="button" class="jana-icon-btn" id="janaCloseBtn" aria-label="Voice Studio schließen">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
       </header>
 
-      <!-- Quick Test Tracking Numbers Bar -->
-      <div class="jana-quick-bar">
-        <span class="jana-quick-caption">Zum Testen ansagen:</span>
-        <div class="jana-quick-chips">
-          <button type="button" class="jana-chip" data-copy="825643754000" title="PLZ 06188 – Scanabriss (NaFo)">825643754000 · NaFo</button>
-          <button type="button" class="jana-chip" data-copy="003404302811" title="PLZ 54411 – In Zustellung">003404302811 · Zustellung</button>
-          <button type="button" class="jana-chip" data-copy="003404348888" title="PLZ 59457 – Ablageort">003404348888 · Ablageort</button>
+      <!-- Native Cognigy WebRTC Stage (seamlessly restyled) -->
+      <div class="jana-studio-stage" id="janaWebrtcMount">
+        <div class="jana-stage-loader" id="janaStageLoader">
+          <div class="jana-orb-loader" aria-hidden="true">
+            <span class="orb-ring"></span>
+            <span class="orb-core"></span>
+          </div>
+          <p>Verbinde Voice-Engine…</p>
         </div>
       </div>
 
-      <!-- Live Cognigy WebRTC Client -->
-      <div class="jana-iframe-shell">
-        <iframe
-          id="janaWebrtcFrame"
-          title="DHL Voicebot Jana WebRTC"
-          data-src="https://static-trial.cognigy.ai/webrtc/?token=9d56470dd93dd948a98bfdae06c67795e4590865551db81e821e5207b26b0bb9"
-          allow="microphone; autoplay; clipboard-read; clipboard-write"
-          loading="lazy"
-        ></iframe>
-      </div>
+      <!-- Compact Quick-Test Tracking Strip -->
+      <footer class="jana-studio-foot">
+        <div class="jana-foot-head">
+          <span class="jana-foot-label">Test-Sendungsnummern zum Ansagen</span>
+          <span class="jana-foot-hint" id="janaCopyHint">Klick kopiert</span>
+        </div>
+        <div class="jana-chip-row">
+          <button type="button" class="jana-chip" data-copy="825643754000" title="PLZ 06188 – Scanabriss (Nachforschung)">
+            <span class="chip-dot is-red"></span>825643754000 <em>NaFo</em>
+          </button>
+          <button type="button" class="jana-chip" data-copy="003404302811" title="PLZ 54411 – In Zustellung">
+            <span class="chip-dot is-green"></span>003404302811 <em>Live</em>
+          </button>
+          <button type="button" class="jana-chip" data-copy="003404348888" title="PLZ 59457 – Ablageort">
+            <span class="chip-dot is-amber"></span>003404348888 <em>Ablage</em>
+          </button>
+        </div>
+      </footer>
     </section>
   </div>
 
+  <script src="https://static-trial.cognigy.ai/webrtc/webRTCWidget.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>
