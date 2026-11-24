@@ -338,16 +338,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let eqBoundAudioEl = null;
   let smoothedVoiceLevel = 0;
 
-  function buildSiriAura() {
-    const wrap = document.createElement("div");
-    wrap.className = "jana-siri-aura";
-    wrap.setAttribute("aria-hidden", "true");
-    wrap.innerHTML =
-      '<span class="siri-lobe l1"></span>' +
-      '<span class="siri-lobe l2"></span>' +
-      '<span class="siri-lobe l3"></span>' +
-      '<span class="siri-rim"></span>';
-    return wrap;
+  function buildWaveCanvas() {
+    const canvas = document.createElement("canvas");
+    canvas.className = "jana-wave-canvas";
+    canvas.setAttribute("aria-hidden", "true");
+    return canvas;
   }
 
   function tryBindRemoteAudioAnalyser() {
@@ -392,12 +387,63 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function drawWaveRibbon(canvas, level, time) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(240, Math.round(rect.width * dpr));
+    const h = Math.max(100, Math.round(rect.height * dpr));
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, w, h);
+    const midY = h * 0.5;
+    const ampBase = (0.04 + level * 0.36) * h;
+
+    const ribbons = [
+      { freq: 0.014, speed: 0.0038, phase: 0.0, scale: 1.0,  color: "rgba(255, 204, 0, 0.85)", width: 2.4 * dpr },
+      { freq: 0.019, speed: -0.0031, phase: 1.8, scale: 0.78, color: "rgba(212, 5, 17, 0.75)",  width: 2.0 * dpr },
+      { freq: 0.025, speed: 0.0046, phase: 3.4, scale: 0.55, color: "rgba(255, 232, 128, 0.72)", width: 1.5 * dpr },
+    ];
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+
+    for (const r of ribbons) {
+      ctx.beginPath();
+      const step = 3 * dpr;
+      for (let x = 0; x <= w; x += step) {
+        const nx = (x / w) * 2 - 1;
+        // Gaussian envelope so the wave tapers smoothly at left & right edges
+        const env = Math.exp(-3.2 * nx * nx);
+        const y =
+          midY +
+          Math.sin(x * (r.freq / dpr) + time * r.speed + r.phase) *
+            Math.cos(x * (r.freq * 0.45 / dpr) - time * r.speed * 0.6) *
+            ampBase *
+            r.scale *
+            env;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = r.color;
+      ctx.lineWidth = r.width;
+      ctx.lineCap = "round";
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   function startRadialEqLoop(container) {
     if (eqAnimFrame) return;
     const freqData = new Uint8Array(64);
 
-    function tick() {
+    function tick(now) {
       const waveOrb = container.querySelector(".webrtc_widget_audio_wave");
+      const waveCanvas = waveOrb && waveOrb.querySelector(".jana-wave-canvas");
       if (!waveOrb) {
         eqAnimFrame = null;
         return;
@@ -426,7 +472,10 @@ document.addEventListener("DOMContentLoaded", () => {
       smoothedVoiceLevel += (speakingLevel - smoothedVoiceLevel) * (speakingLevel > 0.05 ? 0.28 : 0.14);
       const isSpeaking = smoothedVoiceLevel > 0.05;
       waveOrb.classList.toggle("is-speaking", isSpeaking);
-      waveOrb.style.setProperty("--voice-level", smoothedVoiceLevel.toFixed(3));
+
+      if (waveCanvas) {
+        drawWaveRibbon(waveCanvas, smoothedVoiceLevel, now);
+      }
 
       eqAnimFrame = requestAnimationFrame(tick);
     }
@@ -445,11 +494,11 @@ document.addEventListener("DOMContentLoaded", () => {
       avatarBox.appendChild(img);
     }
 
-    // Active-call voice orb avatar + Siri-style fluid aurora halo
+    // Active-call portrait + 60fps Siri/ChatGPT wave ribbon canvas
     const waveOrb = container.querySelector(".webrtc_widget_audio_wave");
     if (waveOrb) {
-      if (!waveOrb.querySelector(".jana-siri-aura")) {
-        waveOrb.prepend(buildSiriAura());
+      if (!waveOrb.querySelector(".jana-wave-canvas")) {
+        waveOrb.prepend(buildWaveCanvas());
       }
       if (!waveOrb.querySelector(".jana-orb-avatar-img")) {
         const orbImg = document.createElement("img");
@@ -461,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
       startRadialEqLoop(container);
     }
 
-    // Place timer neatly inside the horizontal call controls dock (Mute · 00:43 · End)
+    // Move controls dock (.webrtc_widget_call_controls_container) to the BOTTOM, below captions, and place timer inside it
     const controlsDock = container.querySelector(".webrtc_widget_call_controls_container");
     const durationEl = container.querySelector(".webrtc_widget_call_duration");
     const endBtn = container.querySelector(".webrtc_widget_end_call_button");
@@ -473,12 +522,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Force transcript wrapper (.webrtc_widget_transcript_wrapper) to the BOTTOM of its flex parent
+    // Order: [Wave + Portrait] -> [Borderless Captions] -> [Bottom Control Dock]
     const transcriptWrapper = container.querySelector(".webrtc_widget_transcript_wrapper");
-    if (transcriptWrapper && transcriptWrapper.parentElement) {
-      transcriptWrapper.parentElement.style.display = "flex";
-      transcriptWrapper.parentElement.style.flexDirection = "column";
-      transcriptWrapper.style.order = "90";
+    const contentContainer = container.querySelector(".webrtc_widget_content_container");
+    if (transcriptWrapper && contentContainer && controlsDock) {
+      contentContainer.parentElement.style.display = "flex";
+      contentContainer.parentElement.style.flexDirection = "column";
+      contentContainer.style.order = "1";
+      transcriptWrapper.style.order = "2";
+      // Move controlsDock out to the main container so it sits cleanly anchored BELOW the captions
+      if (controlsDock.parentElement !== contentContainer.parentElement) {
+        contentContainer.parentElement.appendChild(controlsDock);
+      }
+      controlsDock.style.order = "90";
     }
   }
 
