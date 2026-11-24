@@ -2102,19 +2102,41 @@ body {
 }
 
 #janaWebrtcMount .webrtc_transcript_container {
-  gap: 6px !important;
-  align-items: center !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+
+#janaWebrtcMount .webrtc_transcript_message {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+}
+
+#janaWebrtcMount .webrtc_transcript_message_user {
+  align-items: flex-end !important;
 }
 
 #janaWebrtcMount .webrtc_transcript_bubble {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  border-radius: 14px !important;
-  padding: 7px 12px !important;
+  background: #222229 !important;
+  color: #f4f4f6 !important;
+  border: 1px solid rgba(255, 204, 0, 0.18) !important;
+  border-radius: 16px !important;
+  border-bottom-left-radius: 5px !important;
+  padding: 8px 13px !important;
   font-size: 13px !important;
   line-height: 1.45 !important;
-  text-align: center !important;
-  max-width: 92% !important;
+  text-align: left !important;
+  max-width: 86% !important;
+}
+
+#janaWebrtcMount .webrtc_transcript_bubble_user {
+  background: linear-gradient(135deg, #e60a17 0%, #c80410 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 16px !important;
+  border-bottom-right-radius: 5px !important;
+  box-shadow: 0 6px 16px rgba(212, 5, 17, 0.3) !important;
 }
 
 /* Compact Horizontal Call Control Dock Anchored at Bottom */

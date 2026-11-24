@@ -337,6 +337,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let eqAnalyser = null;
   let eqBoundAudioEl = null;
   let smoothedVoiceLevel = 0;
+  let lastBotMsgCount = 0;
+  let agentSpeechBurstUntil = 0;
 
   function buildWaveCanvas() {
     const canvas = document.createElement("canvas");
@@ -369,19 +371,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function sampleCognigyCanvasActivity(waveOrb) {
-    const canvas = waveOrb.querySelector("canvas");
+    const canvas = waveOrb.querySelector("canvas:not(.jana-wave-canvas)");
     if (!canvas || !canvas.width || !canvas.height) return 0;
     try {
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) return 0;
       const w = canvas.width;
       const h = canvas.height;
-      const topStrip = ctx.getImageData(0, Math.floor(h * 0.12), w, Math.max(2, Math.floor(h * 0.22))).data;
+      const stripH = Math.max(4, Math.floor(h * 0.34));
+      const topStrip = ctx.getImageData(0, 2, w, stripH).data;
       let lit = 0;
-      for (let i = 3; i < topStrip.length; i += 16) {
-        if (topStrip[i] > 60) lit++;
+      for (let i = 3; i < topStrip.length; i += 4) {
+        if (topStrip[i] > 24) lit++;
       }
-      return Math.min(1, lit / 18);
+      return Math.min(1, lit / 40);
     } catch {
       return 0;
     }
@@ -464,9 +467,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (speakingLevel < 0.05) {
         const canvasLevel = sampleCognigyCanvasActivity(waveOrb);
-        if (canvasLevel > 0.08) {
+        if (canvasLevel > 0.05) {
           speakingLevel = canvasLevel;
         }
+      }
+
+      // Guaranteed visual voice reaction when Jana's new transcript bubble arrives
+      if (speakingLevel < 0.05 && Date.now() < agentSpeechBurstUntil) {
+        const mod = 0.55 + 0.45 * Math.sin(now * 0.011) * Math.cos(now * 0.006);
+        speakingLevel = 0.45 + 0.45 * Math.abs(mod);
       }
 
       smoothedVoiceLevel += (speakingLevel - smoothedVoiceLevel) * (speakingLevel > 0.05 ? 0.28 : 0.14);
@@ -540,6 +549,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function autoScrollVoiceTranscript(container) {
+    const botMsgs = container.querySelectorAll(".webrtc_transcript_message:not(.webrtc_transcript_message_user)");
+    if (botMsgs.length > lastBotMsgCount) {
+      lastBotMsgCount = botMsgs.length;
+      const latestText = (botMsgs[botMsgs.length - 1].textContent || "").trim();
+      const durationMs = Math.min(8000, Math.max(2400, latestText.length * 65));
+      agentSpeechBurstUntil = Date.now() + durationMs;
+    }
     const wrapper = container.querySelector(".webrtc_widget_transcript_wrapper");
     if (!wrapper) return;
     requestAnimationFrame(() => {
