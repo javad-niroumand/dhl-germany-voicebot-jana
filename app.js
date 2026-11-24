@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Socket.IO Webchat state
   let socket = null;
   let socketConnected = false;
+  let chatAutoStarted = false;
   const pendingMessages = [];
   const chatUserId = createSessionId("dhl-user");
   const chatSessionId = createSessionId("dhl-chat");
@@ -212,7 +213,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (activeMode === "chat") {
         setStatus("Online · Verbunden mit DHL Webchat", false);
       }
+      if (!chatAutoStarted && pendingMessages.length === 0) {
+        chatAutoStarted = true;
+        setTyping(true);
+        emitCognigyInput("Hallo", { autoStart: true });
+      }
       while (pendingMessages.length > 0) {
+        chatAutoStarted = true;
         const item = pendingMessages.shift();
         emitCognigyInput(item.text, item.data);
       }
