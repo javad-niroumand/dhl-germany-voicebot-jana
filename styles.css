@@ -2077,12 +2077,12 @@ body {
   opacity: 0.55 !important;
 }
 
-/* Active Call Orb with Liquid Concentric Pulse Waves (Neutral when silent/user speaks, fluid waves when Jana speaks) */
+/* Active Call Orb with iPhone Siri-Style Fluid Aurora Halo */
 #janaWebrtcMount .webrtc_widget_audio_wave {
   position: relative !important;
-  width: 92px !important;
-  height: 92px !important;
-  margin: 14px auto 4px !important;
+  width: 102px !important;
+  height: 102px !important;
+  margin: 14px auto 6px !important;
   border-radius: 50% !important;
   background: transparent !important;
   border: 0 !important;
@@ -2096,7 +2096,7 @@ body {
 
 /* Keep Cognigy's canvas mounted invisibly so we can read live agent speech */
 #janaWebrtcMount .webrtc_widget_audio_wave canvas,
-#janaWebrtcMount .webrtc_widget_audio_wave > *:not(.jana-orb-avatar-img):not(.jana-pulse-rings) {
+#janaWebrtcMount .webrtc_widget_audio_wave > *:not(.jana-orb-avatar-img):not(.jana-siri-aura) {
   position: absolute !important;
   opacity: 0 !important;
   pointer-events: none !important;
@@ -2111,73 +2111,112 @@ body {
   object-fit: cover !important;
   display: block !important;
   position: relative !important;
-  z-index: 3 !important;
-  border: 3px solid rgba(255, 204, 0, 0.65) !important;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5) !important;
-  transform: scale(calc(1 + var(--voice-level, 0) * 0.06)) !important;
-  transition: transform 90ms ease-out, box-shadow 140ms ease, border-color 140ms ease !important;
+  z-index: 4 !important;
+  border: 2.5px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 204, 0, 0.45),
+    0 10px 26px rgba(0, 0, 0, 0.55) !important;
+  transform: scale(calc(1 + var(--voice-level, 0) * 0.055)) !important;
+  transition: transform 85ms ease-out, border-color 180ms ease !important;
 }
 
 #janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .jana-orb-avatar-img {
-  border-color: #ffcc00 !important;
-  box-shadow:
-    0 0 0 5px rgba(255, 204, 0, 0.2),
-    0 0 28px rgba(255, 204, 0, 0.45),
-    0 10px 26px rgba(0, 0, 0, 0.55) !important;
+  border-color: rgba(255, 245, 204, 0.9) !important;
 }
 
-/* Liquid Concentric Acoustic Pulse Rings */
-#janaWebrtcMount .jana-pulse-rings {
+/* Siri-Style Fluid Silk Aurora Layers */
+#janaWebrtcMount .jana-siri-aura {
   position: absolute !important;
-  inset: -6px !important;
+  inset: -14px !important;
   border-radius: 50% !important;
   pointer-events: none !important;
   z-index: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform: scale(calc(0.94 + var(--voice-level, 0) * 0.26)) !important;
+  transition: transform 95ms ease-out !important;
 }
 
-#janaWebrtcMount .jana-pulse-ring {
+#janaWebrtcMount .siri-lobe {
   position: absolute;
-  inset: 0;
+  inset: 10px;
+  border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%;
+  filter: blur(11px);
+  mix-blend-mode: screen;
+  opacity: 0.14;
+  transition: opacity 240ms ease;
+}
+
+#janaWebrtcMount .siri-lobe.l1 {
+  background: conic-gradient(from 0deg, #ffcc00, #ff6b00, #ff1e38, #ffe566, #ffcc00);
+}
+
+#janaWebrtcMount .siri-lobe.l2 {
+  inset: 12px;
+  border-radius: 55% 45% 42% 58% / 56% 52% 48% 44%;
+  background: conic-gradient(from 140deg, #ff2a4b, #ffcc00, #ff8800, #fff0a6, #ff2a4b);
+}
+
+#janaWebrtcMount .siri-lobe.l3 {
+  inset: 16px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 204, 0, 0.22);
-  opacity: 0;
-  transform: scale(1);
-  transition: opacity 220ms ease;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85), rgba(255, 204, 0, 0.65) 48%, rgba(212, 5, 17, 0.4) 80%, transparent);
+  filter: blur(7px);
 }
 
-/* Calm neutral outer halo when user speaks or silent */
-#janaWebrtcMount .jana-pulse-ring.r1 {
+/* Crisp Siri Luminous Silk Rim (always subtly visible, glows bright when Jana speaks) */
+#janaWebrtcMount .siri-rim {
+  position: absolute;
+  inset: 19px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(255, 204, 0, 0.7), rgba(255, 42, 75, 0.65), rgba(255, 240, 170, 0.9), rgba(255, 204, 0, 0.7));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
   opacity: 0.35;
-  border-color: rgba(255, 204, 0, 0.28);
+  transition: opacity 200ms ease;
 }
 
-/* Dynamic liquid expanding ripples ONLY while Jana is speaking */
-#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .jana-pulse-ring.r1 {
-  border-color: rgba(255, 204, 0, 0.85);
-  box-shadow: 0 0 18px rgba(255, 204, 0, 0.35);
-  animation: janaLiquidWave 1.45s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+/* Active Speaking State: Fluid Swirling Siri Plasma */
+#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .siri-lobe.l1 {
+  opacity: 0.88;
+  animation: siriSwirlA 2.4s ease-in-out infinite;
 }
 
-#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .jana-pulse-ring.r2 {
-  border-color: rgba(212, 5, 17, 0.72);
-  animation: janaLiquidWave 1.45s cubic-bezier(0.16, 1, 0.3, 1) 0.48s infinite;
+#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .siri-lobe.l2 {
+  opacity: 0.78;
+  animation: siriSwirlB 1.9s ease-in-out infinite;
 }
 
-#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .jana-pulse-ring.r3 {
-  background: radial-gradient(circle, rgba(255, 204, 0, 0.22) 0%, transparent 70%);
-  border-color: rgba(255, 224, 102, 0.65);
-  animation: janaLiquidWave 1.45s cubic-bezier(0.16, 1, 0.3, 1) 0.96s infinite;
+#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .siri-lobe.l3 {
+  opacity: 0.68;
+  animation: siriBreathe 1.3s ease-in-out infinite;
 }
 
-@keyframes janaLiquidWave {
-  0% {
-    transform: scale(0.96);
-    opacity: 0.85;
-  }
-  100% {
-    transform: scale(1.52);
-    opacity: 0;
-  }
+#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .siri-rim {
+  opacity: 1;
+  animation: siriRimSpin 2.2s linear infinite;
+}
+
+@keyframes siriSwirlA {
+  0%   { transform: rotate(0deg) scale(1.02, 0.96); border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%; }
+  50%  { transform: rotate(180deg) scale(1.12, 1.04); border-radius: 56% 44% 46% 54% / 52% 58% 42% 48%; }
+  100% { transform: rotate(360deg) scale(1.02, 0.96); border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%; }
+}
+
+@keyframes siriSwirlB {
+  0%   { transform: rotate(360deg) scale(0.98, 1.08); border-radius: 55% 45% 42% 58% / 56% 52% 48% 44%; }
+  50%  { transform: rotate(180deg) scale(1.1, 0.98); border-radius: 42% 58% 55% 45% / 44% 48% 52% 56%; }
+  100% { transform: rotate(0deg) scale(0.98, 1.08); border-radius: 55% 45% 42% 58% / 56% 52% 48% 44%; }
+}
+
+@keyframes siriBreathe {
+  0%, 100% { transform: scale(0.96); }
+  50%      { transform: scale(1.14); }
+}
+
+@keyframes siriRimSpin {
+  to { transform: rotate(360deg); }
 }
 
 #janaWebrtcMount .webrtc_widget_transcript_wrapper::-webkit-scrollbar,

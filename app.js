@@ -338,14 +338,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let eqBoundAudioEl = null;
   let smoothedVoiceLevel = 0;
 
-  function buildLiquidPulseRings() {
+  function buildSiriAura() {
     const wrap = document.createElement("div");
-    wrap.className = "jana-pulse-rings";
+    wrap.className = "jana-siri-aura";
     wrap.setAttribute("aria-hidden", "true");
     wrap.innerHTML =
-      '<span class="jana-pulse-ring r1"></span>' +
-      '<span class="jana-pulse-ring r2"></span>' +
-      '<span class="jana-pulse-ring r3"></span>';
+      '<span class="siri-lobe l1"></span>' +
+      '<span class="siri-lobe l2"></span>' +
+      '<span class="siri-lobe l3"></span>' +
+      '<span class="siri-rim"></span>';
     return wrap;
   }
 
@@ -444,11 +445,11 @@ document.addEventListener("DOMContentLoaded", () => {
       avatarBox.appendChild(img);
     }
 
-    // Active-call voice orb avatar + liquid concentric pulse rings
+    // Active-call voice orb avatar + Siri-style fluid aurora halo
     const waveOrb = container.querySelector(".webrtc_widget_audio_wave");
     if (waveOrb) {
-      if (!waveOrb.querySelector(".jana-pulse-rings")) {
-        waveOrb.prepend(buildLiquidPulseRings());
+      if (!waveOrb.querySelector(".jana-siri-aura")) {
+        waveOrb.prepend(buildSiriAura());
       }
       if (!waveOrb.querySelector(".jana-orb-avatar-img")) {
         const orbImg = document.createElement("img");
