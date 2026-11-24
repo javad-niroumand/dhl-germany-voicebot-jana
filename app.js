@@ -332,26 +332,145 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  const RADIAL_RAYS = 28;
+  let eqAnimFrame = null;
+  let eqAudioCtx = null;
+  let eqAnalyser = null;
+  let eqBoundAudioEl = null;
+  let eqSmoothed = new Float32Array(RADIAL_RAYS);
+
   function buildRadialEqSvg() {
     const ns = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(ns, "svg");
-    svg.setAttribute("viewBox", "0 0 140 140");
+    svg.setAttribute("viewBox", "0 0 148 148");
     svg.setAttribute("class", "jana-radial-eq");
     svg.setAttribute("aria-hidden", "true");
-    const rays = 28;
-    for (let i = 0; i < rays; i++) {
-      const angle = (i * 360) / rays;
+    for (let i = 0; i < RADIAL_RAYS; i++) {
+      const angle = (i * 360) / RADIAL_RAYS;
       const rad = (angle * Math.PI) / 180;
-      const inner = 50;
-      const outer = i % 3 === 0 ? 66 : i % 2 === 0 ? 61 : 57;
+      const inner = 51;
+      const outer = 55;
       const line = document.createElementNS(ns, "line");
-      line.setAttribute("x1", (70 + inner * Math.cos(rad)).toFixed(1));
-      line.setAttribute("y1", (70 + inner * Math.sin(rad)).toFixed(1));
-      line.setAttribute("x2", (70 + outer * Math.cos(rad)).toFixed(1));
-      line.setAttribute("y2", (70 + outer * Math.sin(rad)).toFixed(1));
+      line.dataset.cos = Math.cos(rad).toFixed(4);
+      line.dataset.sin = Math.sin(rad).toFixed(4);
+      line.setAttribute("x1", (74 + inner * Math.cos(rad)).toFixed(1));
+      line.setAttribute("y1", (74 + inner * Math.sin(rad)).toFixed(1));
+      line.setAttribute("x2", (74 + outer * Math.cos(rad)).toFixed(1));
+      line.setAttribute("y2", (74 + outer * Math.sin(rad)).toFixed(1));
       svg.appendChild(line);
     }
     return svg;
+  }
+
+  function tryBindRemoteAudioAnalyser() {
+    const audios = document.querySelectorAll("audio");
+    for (const audio of audios) {
+      if (audio.srcObject && audio !== eqBoundAudioEl) {
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!eqAudioCtx) eqAudioCtx = new AudioCtx();
+          if (eqAudioCtx.state === "suspended") eqAudioCtx.resume().catch(() => {});
+          const src = eqAudioCtx.createMediaStreamSource(audio.srcObject);
+          eqAnalyser = eqAudioCtx.createAnalyser();
+          eqAnalyser.fftSize = 128;
+          eqAnalyser.smoothingTimeConstant = 0.72;
+          src.connect(eqAnalyser);
+          eqBoundAudioEl = audio;
+          return true;
+        } catch {
+          // Ignore if stream cannot be tapped
+        }
+      }
+    }
+    return Boolean(eqAnalyser);
+  }
+
+  function sampleCognigyCanvasActivity(waveOrb) {
+    const canvas = waveOrb.querySelector("canvas");
+    if (!canvas || !canvas.width || !canvas.height) return 0;
+    try {
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return 0;
+      const w = canvas.width;
+      const h = canvas.height;
+      // Cognigy draws taller bars into the top/bottom 30% of the canvas ONLY when agent speaks
+      const topStrip = ctx.getImageData(0, Math.floor(h * 0.12), w, Math.max(2, Math.floor(h * 0.22))).data;
+      let lit = 0;
+      for (let i = 3; i < topStrip.length; i += 16) {
+        if (topStrip[i] > 60) lit++;
+      }
+      return Math.min(1, lit / 18);
+    } catch {
+      return 0;
+    }
+  }
+
+  function startRadialEqLoop(container) {
+    if (eqAnimFrame) return;
+    const freqData = new Uint8Array(64);
+
+    function tick(now) {
+      const waveOrb = container.querySelector(".webrtc_widget_audio_wave");
+      const eqSvg = waveOrb && waveOrb.querySelector(".jana-radial-eq");
+      if (!waveOrb || !eqSvg) {
+        eqAnimFrame = null;
+        return;
+      }
+
+      tryBindRemoteAudioAnalyser();
+
+      let speakingLevel = 0;
+      let hasFreqBins = false;
+
+      if (eqAnalyser) {
+        eqAnalyser.getByteFrequencyData(freqData);
+        let sum = 0;
+        for (let i = 1; i < 28; i++) sum += freqData[i];
+        const avg = sum / (27 * 255);
+        if (avg > 0.025) {
+          speakingLevel = Math.min(1, avg * 2.6);
+          hasFreqBins = true;
+        }
+      }
+
+      // Fallback: sample Cognigy's own agent-voice canvas if WebAudio stream isn't exposed
+      if (speakingLevel < 0.05) {
+        const canvasLevel = sampleCognigyCanvasActivity(waveOrb);
+        if (canvasLevel > 0.08) {
+          speakingLevel = canvasLevel;
+        }
+      }
+
+      const isSpeaking = speakingLevel > 0.06;
+      waveOrb.classList.toggle("is-speaking", isSpeaking);
+
+      const lines = eqSvg.children;
+      const t = now * 0.008;
+      for (let i = 0; i < lines.length; i++) {
+        let target = 0;
+        if (isSpeaking) {
+          if (hasFreqBins) {
+            const bin = freqData[(i % 24) + 2] / 255;
+            target = Math.max(0.15, Math.min(1, bin * 1.45));
+          } else {
+            const wave = 0.5 + 0.5 * Math.sin(t + i * 0.7) * Math.cos(t * 0.65 - i * 0.45);
+            target = speakingLevel * (0.28 + 0.72 * wave);
+          }
+        }
+        // Smooth spring toward target (0 = calm neutral short circle)
+        eqSmoothed[i] += (target - eqSmoothed[i]) * (isSpeaking ? 0.28 : 0.16);
+        const outer = 55 + eqSmoothed[i] * 17;
+        const c = parseFloat(lines[i].dataset.cos);
+        const s = parseFloat(lines[i].dataset.sin);
+        lines[i].setAttribute("x2", (74 + outer * c).toFixed(1));
+        lines[i].setAttribute("y2", (74 + outer * s).toFixed(1));
+        lines[i].setAttribute("stroke-width", (2.1 + eqSmoothed[i] * 1.6).toFixed(2));
+      }
+
+      eqAnimFrame = requestAnimationFrame(tick);
+    }
+
+    eqAnimFrame = requestAnimationFrame(tick);
   }
 
   function syncVoiceAvatar(container) {
@@ -365,7 +484,7 @@ document.addEventListener("DOMContentLoaded", () => {
       avatarBox.appendChild(img);
     }
 
-    // Active-call voice orb avatar + 360° radial equalizer ring
+    // Active-call voice orb avatar + 360° live voice-reactive equalizer ring
     const waveOrb = container.querySelector(".webrtc_widget_audio_wave");
     if (waveOrb) {
       if (!waveOrb.querySelector(".jana-radial-eq")) {
@@ -378,14 +497,15 @@ document.addEventListener("DOMContentLoaded", () => {
         orbImg.className = "jana-orb-avatar-img";
         waveOrb.prepend(orbImg);
       }
+      startRadialEqLoop(container);
     }
 
-    // Force transcript section to bottom of its flex parent (avatar orb stays UP)
-    const transcriptSection = container.querySelector(".webrtc_widget_transcript_section");
-    if (transcriptSection && transcriptSection.parentElement) {
-      transcriptSection.parentElement.style.display = "flex";
-      transcriptSection.parentElement.style.flexDirection = "column";
-      transcriptSection.style.order = "90";
+    // Force transcript wrapper (.webrtc_widget_transcript_wrapper) to the BOTTOM of its flex parent
+    const transcriptWrapper = container.querySelector(".webrtc_widget_transcript_wrapper");
+    if (transcriptWrapper && transcriptWrapper.parentElement) {
+      transcriptWrapper.parentElement.style.display = "flex";
+      transcriptWrapper.parentElement.style.flexDirection = "column";
+      transcriptWrapper.style.order = "90";
     }
   }
 

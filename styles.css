@@ -1974,7 +1974,7 @@ body {
   box-shadow: 0 12px 28px rgba(212, 5, 17, 0.65) !important;
 }
 
-/* Active Call Layout Order: Avatar Orb & Controls UP, Transcript DOWN */
+/* Active Call Layout Order: Avatar Orb & Controls UP, Transcript Wrapper DOWN */
 #janaWebrtcMount .webrtc_widget_outer_wrapper,
 #janaWebrtcMount .webrtc_widget_container,
 #janaWebrtcMount .webrtc_widget_content_container {
@@ -1997,15 +1997,31 @@ body {
   order: 1 !important;
 }
 
-#janaWebrtcMount .webrtc_widget_transcript_section {
+/* CRITICAL: .webrtc_widget_transcript_wrapper is the OUTER sibling — put it at the BOTTOM! */
+#janaWebrtcMount .webrtc_widget_transcript_wrapper {
   order: 90 !important;
+  width: 100% !important;
+  max-height: 155px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 12px 12px 14px !important;
+  margin: 10px 0 0 !important;
+  scroll-behavior: smooth !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 204, 0, 0.35) transparent !important;
+}
+
+#janaWebrtcMount .webrtc_widget_transcript_section {
   width: 100% !important;
   max-height: none !important;
   overflow: visible !important;
   background: transparent !important;
   border: 0 !important;
   padding: 0 !important;
-  margin: 8px 0 0 !important;
+  margin: 0 !important;
   box-shadow: none !important;
 }
 
@@ -2017,12 +2033,12 @@ body {
   opacity: 0.75 !important;
 }
 
-/* Active Call Voice Reaction Orb with 360° Radial Equalizer Ring */
+/* Active Call Voice Reaction Orb with 360° Live Voice-Reactive Equalizer Ring */
 #janaWebrtcMount .webrtc_widget_audio_wave {
   position: relative !important;
-  width: 108px !important;
-  height: 108px !important;
-  margin: 14px auto 6px !important;
+  width: 112px !important;
+  height: 112px !important;
+  margin: 12px auto 6px !important;
   border-radius: 50% !important;
   background: transparent !important;
   border: 0 !important;
@@ -2033,9 +2049,14 @@ body {
   overflow: visible !important;
 }
 
-/* Hide Cognigy's flat inner blue bars so our 360° radial ring shines */
+/* Keep Cognigy's canvas mounted invisibly so we can read its live agent-speech waveform */
+#janaWebrtcMount .webrtc_widget_audio_wave canvas,
 #janaWebrtcMount .webrtc_widget_audio_wave > *:not(.jana-orb-avatar-img):not(.jana-radial-eq) {
-  display: none !important;
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 56px !important;
+  height: 56px !important;
 }
 
 #janaWebrtcMount .jana-orb-avatar-img {
@@ -2046,67 +2067,42 @@ body {
   display: block !important;
   position: relative !important;
   z-index: 2 !important;
-  border: 3px solid #ffcc00 !important;
+  border: 3px solid rgba(255, 204, 0, 0.7) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55) !important;
+  transition: box-shadow 120ms ease, border-color 120ms ease !important;
+}
+
+#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .jana-orb-avatar-img {
+  border-color: #ffcc00 !important;
   box-shadow:
-    0 0 24px rgba(255, 204, 0, 0.35),
+    0 0 0 6px rgba(255, 204, 0, 0.18),
+    0 0 28px rgba(255, 204, 0, 0.45),
     0 10px 26px rgba(0, 0, 0, 0.55) !important;
 }
 
-/* 360° Radial Voice Equalizer SVG Encircling the Avatar Orb */
+/* 360° Radial Voice Equalizer SVG Encircling the Avatar Orb (Neutral by default, reacts live to Jana's voice) */
 #janaWebrtcMount .jana-radial-eq {
   position: absolute !important;
-  inset: -16px !important;
-  width: calc(100% + 32px) !important;
-  height: calc(100% + 32px) !important;
+  inset: -18px !important;
+  width: calc(100% + 36px) !important;
+  height: calc(100% + 36px) !important;
   z-index: 1 !important;
   pointer-events: none !important;
-  animation: eqSlowSpin 18s linear infinite;
 }
 
 #janaWebrtcMount .jana-radial-eq line {
-  stroke: #ffcc00;
-  stroke-width: 2.6;
+  stroke: rgba(255, 204, 0, 0.35);
+  stroke-width: 2.2;
   stroke-linecap: round;
-  transform-origin: 70px 70px;
-  animation: eqRayPulse 1.15s ease-in-out infinite;
+  transition: stroke 120ms ease;
 }
 
-#janaWebrtcMount .jana-radial-eq line:nth-child(3n) {
+#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .jana-radial-eq line {
+  stroke: #ffcc00;
+}
+
+#janaWebrtcMount .webrtc_widget_audio_wave.is-speaking .jana-radial-eq line:nth-child(4n) {
   stroke: #ff3b47;
-  animation-duration: 0.92s;
-}
-
-#janaWebrtcMount .jana-radial-eq line:nth-child(2n) {
-  animation-delay: -0.35s;
-}
-
-#janaWebrtcMount .jana-radial-eq line:nth-child(5n) {
-  animation-delay: -0.68s;
-}
-
-@keyframes eqSlowSpin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes eqRayPulse {
-  0%, 100% { opacity: 0.45; stroke-width: 2.2; }
-  50% { opacity: 1; stroke-width: 3.4; }
-}
-
-/* Clean Single-Container Transcript (Bottom, Auto-Scrolling, Zero White Scrollbars) */
-#janaWebrtcMount .webrtc_widget_transcript_wrapper {
-  width: 100% !important;
-  max-height: 150px !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 16px !important;
-  padding: 12px 12px 14px !important;
-  margin: 0 !important;
-  scroll-behavior: smooth !important;
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(255, 204, 0, 0.35) transparent !important;
 }
 
 #janaWebrtcMount .webrtc_widget_transcript_wrapper::-webkit-scrollbar,
