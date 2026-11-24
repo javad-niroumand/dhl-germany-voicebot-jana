@@ -332,6 +332,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function buildRadialEqSvg() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 140 140");
+    svg.setAttribute("class", "jana-radial-eq");
+    svg.setAttribute("aria-hidden", "true");
+    const rays = 28;
+    for (let i = 0; i < rays; i++) {
+      const angle = (i * 360) / rays;
+      const rad = (angle * Math.PI) / 180;
+      const inner = 50;
+      const outer = i % 3 === 0 ? 66 : i % 2 === 0 ? 61 : 57;
+      const line = document.createElementNS(ns, "line");
+      line.setAttribute("x1", (70 + inner * Math.cos(rad)).toFixed(1));
+      line.setAttribute("y1", (70 + inner * Math.sin(rad)).toFixed(1));
+      line.setAttribute("x2", (70 + outer * Math.cos(rad)).toFixed(1));
+      line.setAttribute("y2", (70 + outer * Math.sin(rad)).toFixed(1));
+      svg.appendChild(line);
+    }
+    return svg;
+  }
+
   function syncVoiceAvatar(container) {
     // Idle avatar circle
     const avatarBox = container.querySelector(".webrtc_widget_avatar, .webrtc_widget_avatar_default");
@@ -343,14 +365,27 @@ document.addEventListener("DOMContentLoaded", () => {
       avatarBox.appendChild(img);
     }
 
-    // Active-call voice orb avatar
+    // Active-call voice orb avatar + 360° radial equalizer ring
     const waveOrb = container.querySelector(".webrtc_widget_audio_wave");
-    if (waveOrb && !waveOrb.querySelector(".jana-orb-avatar-img")) {
-      const orbImg = document.createElement("img");
-      orbImg.src = "./images/jana-avatar.jpg";
-      orbImg.alt = "Jana spricht";
-      orbImg.className = "jana-orb-avatar-img";
-      waveOrb.prepend(orbImg);
+    if (waveOrb) {
+      if (!waveOrb.querySelector(".jana-radial-eq")) {
+        waveOrb.prepend(buildRadialEqSvg());
+      }
+      if (!waveOrb.querySelector(".jana-orb-avatar-img")) {
+        const orbImg = document.createElement("img");
+        orbImg.src = "./images/jana-avatar.jpg";
+        orbImg.alt = "Jana spricht";
+        orbImg.className = "jana-orb-avatar-img";
+        waveOrb.prepend(orbImg);
+      }
+    }
+
+    // Force transcript section to bottom of its flex parent (avatar orb stays UP)
+    const transcriptSection = container.querySelector(".webrtc_widget_transcript_section");
+    if (transcriptSection && transcriptSection.parentElement) {
+      transcriptSection.parentElement.style.display = "flex";
+      transcriptSection.parentElement.style.flexDirection = "column";
+      transcriptSection.style.order = "90";
     }
   }
 
