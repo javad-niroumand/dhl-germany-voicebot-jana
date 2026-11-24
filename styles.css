@@ -1944,48 +1944,137 @@ body {
 }
 
 #janaWebrtcMount .webrtc_widget_mute_button {
-  background: rgba(255, 255, 255, 0.08) !important;
+  width: 48px !important;
+  height: 48px !important;
+  background: rgba(255, 255, 255, 0.09) !important;
   color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: 50% !important;
+  transition: background-color 160ms ease, transform 160ms ease !important;
+}
+
+#janaWebrtcMount .webrtc_widget_mute_button:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  transform: scale(1.06) !important;
 }
 
 #janaWebrtcMount .webrtc_widget_end_call_button {
-  background: #d40511 !important;
+  width: 48px !important;
+  height: 48px !important;
+  background: linear-gradient(135deg, #e60a17 0%, #c80410 100%) !important;
   color: #ffffff !important;
   border: 0 !important;
   border-radius: 50% !important;
-  box-shadow: 0 8px 20px rgba(212, 5, 17, 0.45) !important;
+  box-shadow: 0 8px 22px rgba(212, 5, 17, 0.5) !important;
+  transition: transform 160ms ease, box-shadow 160ms ease !important;
 }
 
-#janaWebrtcMount .webrtc_widget_transcript_section,
+#janaWebrtcMount .webrtc_widget_end_call_button:hover {
+  transform: scale(1.06) !important;
+  box-shadow: 0 12px 28px rgba(212, 5, 17, 0.65) !important;
+}
+
+/* Active Call Audio Wave Orb */
+#janaWebrtcMount .webrtc_widget_audio_wave {
+  width: 68px !important;
+  height: 68px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 50% 40%, rgba(255, 204, 0, 0.22) 0%, rgba(24, 24, 30, 0.95) 75%) !important;
+  border: 2px solid rgba(255, 204, 0, 0.65) !important;
+  box-shadow:
+    0 0 0 8px rgba(255, 204, 0, 0.08),
+    0 10px 26px rgba(0, 0, 0, 0.45) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#janaWebrtcMount .webrtc_widget_audio_wave svg,
+#janaWebrtcMount .webrtc_widget_audio_wave svg * {
+  fill: #ffcc00 !important;
+  stroke: #ffcc00 !important;
+}
+
+/* Clean Single-Container Transcript (Zero Double Borders, Zero White Scrollbars) */
+#janaWebrtcMount .webrtc_widget_transcript_section {
+  width: 100% !important;
+  max-height: none !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 0 6px !important;
+  box-shadow: none !important;
+}
+
 #janaWebrtcMount .webrtc_widget_transcript_wrapper {
   width: 100% !important;
-  max-height: 165px !important;
+  max-height: 175px !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
-  border-radius: 14px !important;
-  padding: 10px 12px !important;
-  margin-top: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 12px 12px !important;
+  margin: 0 !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 204, 0, 0.35) transparent !important;
+}
+
+#janaWebrtcMount .webrtc_widget_transcript_wrapper::-webkit-scrollbar,
+.jana-studio-stage::-webkit-scrollbar {
+  width: 4px !important;
+  height: 4px !important;
+}
+
+#janaWebrtcMount .webrtc_widget_transcript_wrapper::-webkit-scrollbar-track,
+.jana-studio-stage::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+#janaWebrtcMount .webrtc_widget_transcript_wrapper::-webkit-scrollbar-thumb,
+.jana-studio-stage::-webkit-scrollbar-thumb {
+  background: rgba(255, 204, 0, 0.35) !important;
+  border-radius: 999px !important;
+}
+
+#janaWebrtcMount .webrtc_widget_transcript_wrapper::-webkit-scrollbar-button,
+.jana-studio-stage::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+#janaWebrtcMount .webrtc_transcript_container {
+  overflow: visible !important;
+  max-height: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  gap: 8px !important;
 }
 
 #janaWebrtcMount .webrtc_transcript_bubble {
   background: rgba(255, 255, 255, 0.08) !important;
   color: #f4f4f6 !important;
-  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 14px !important;
+  padding: 9px 12px !important;
   font-size: 13px !important;
   line-height: 1.45 !important;
 }
 
 #janaWebrtcMount .webrtc_transcript_agent_name {
   color: #ffcc00 !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 3px !important;
 }
 
 #janaWebrtcMount .webrtc_widget_powered_by {
-  margin-top: 10px !important;
+  margin-top: 8px !important;
   font-size: 10px !important;
   color: #71717a !important;
   opacity: 0.75 !important;
