@@ -1414,6 +1414,49 @@ body {
   box-shadow: 0 8px 20px rgba(255, 204, 0, 0.4);
 }
 
+.jana-meta-card {
+  max-width: 82%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #1e1e25;
+  border: 1px solid rgba(255, 204, 0, 0.28);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.jana-meta-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.jana-meta-body {
+  padding: 12px 14px 14px;
+}
+
+.jana-meta-kicker {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #ffcc00;
+  margin-bottom: 4px;
+}
+
+.jana-meta-body h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.jana-meta-body p {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #b4b4be;
+}
+
 .jana-msg-row.is-user .jana-bubble {
   background: linear-gradient(135deg, #e60a17 0%, #c80410 100%);
   color: #ffffff;

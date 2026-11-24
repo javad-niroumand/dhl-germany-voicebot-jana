@@ -184,6 +184,32 @@ document.addEventListener("DOMContentLoaded", () => {
     chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
   }
 
+  function appendMetadataCard(meta) {
+    if (!chatMessagesEl || !meta || (!meta.url && !meta.title)) return;
+    const row = document.createElement("div");
+    row.className = "jana-msg-row is-bot";
+    const imgHtml = meta.imageUrl
+      ? `<img src="${escapeHtml(meta.imageUrl)}" alt="${escapeHtml(meta.title || "DHL")}" class="jana-meta-img" loading="lazy" />`
+      : "";
+    const linkHtml = meta.url
+      ? `<a href="${escapeHtml(meta.url)}" target="_blank" rel="noopener noreferrer" class="jana-xapp-btn">Mehr auf DHL.de erfahren ↗</a>`
+      : "";
+    row.innerHTML = `
+      <img src="./images/jana-avatar.jpg" alt="Jana" class="jana-msg-avatar" />
+      <div class="jana-meta-card">
+        ${imgHtml}
+        <div class="jana-meta-body">
+          <span class="jana-meta-kicker">DHL SERVICE-INFO</span>
+          <h4>${escapeHtml(meta.title || "DHL Information")}</h4>
+          ${meta.description ? `<p>${escapeHtml(meta.description)}</p>` : ""}
+          ${linkHtml}
+        </div>
+      </div>
+    `;
+    chatMessagesEl.appendChild(row);
+    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+  }
+
   function setTyping(visible) {
     if (typingEl) typingEl.hidden = !visible;
     if (visible && chatMessagesEl) {
@@ -252,6 +278,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (cleaned) {
         appendChatMessage("bot", cleaned, quickReplies);
+      }
+
+      const dhlMeta = data && data.data && data.data.dhlMetadata;
+      if (dhlMeta) {
+        appendMetadataCard(dhlMeta);
       }
     });
 
