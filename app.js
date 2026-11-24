@@ -333,21 +333,41 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function syncVoiceAvatar(container) {
+    // Idle avatar circle
     const avatarBox = container.querySelector(".webrtc_widget_avatar, .webrtc_widget_avatar_default");
-    if (!avatarBox) return;
-    if (!avatarBox.querySelector(".jana-webrtc-avatar-img")) {
+    if (avatarBox && !avatarBox.querySelector(".jana-webrtc-avatar-img")) {
       const img = document.createElement("img");
       img.src = "./images/jana-avatar.jpg";
       img.alt = "Jana – DHL Assistentin";
       img.className = "jana-webrtc-avatar-img";
       avatarBox.appendChild(img);
     }
+
+    // Active-call voice orb avatar
+    const waveOrb = container.querySelector(".webrtc_widget_audio_wave");
+    if (waveOrb && !waveOrb.querySelector(".jana-orb-avatar-img")) {
+      const orbImg = document.createElement("img");
+      orbImg.src = "./images/jana-avatar.jpg";
+      orbImg.alt = "Jana spricht";
+      orbImg.className = "jana-orb-avatar-img";
+      waveOrb.prepend(orbImg);
+    }
+  }
+
+  function autoScrollVoiceTranscript(container) {
+    const wrapper = container.querySelector(".webrtc_widget_transcript_wrapper");
+    if (!wrapper) return;
+    requestAnimationFrame(() => {
+      wrapper.scrollTop = wrapper.scrollHeight;
+    });
   }
 
   function observeCallState(container) {
     syncVoiceAvatar(container);
+    autoScrollVoiceTranscript(container);
     const observer = new MutationObserver(() => {
       syncVoiceAvatar(container);
+      autoScrollVoiceTranscript(container);
       const calling = Boolean(
         container.querySelector(".webrtc_widget_content_container_calling, .webrtc_widget_end_call_button")
       );
@@ -358,7 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       }
     });
-    observer.observe(container, { childList: true, subtree: true, attributes: true });
+    observer.observe(container, { childList: true, subtree: true, characterData: true, attributes: true });
   }
 
   async function mountNativeWebRTC() {
