@@ -332,34 +332,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  const RADIAL_RAYS = 28;
   let eqAnimFrame = null;
   let eqAudioCtx = null;
   let eqAnalyser = null;
   let eqBoundAudioEl = null;
-  let eqSmoothed = new Float32Array(RADIAL_RAYS);
+  let smoothedVoiceLevel = 0;
 
-  function buildRadialEqSvg() {
-    const ns = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(ns, "svg");
-    svg.setAttribute("viewBox", "0 0 148 148");
-    svg.setAttribute("class", "jana-radial-eq");
-    svg.setAttribute("aria-hidden", "true");
-    for (let i = 0; i < RADIAL_RAYS; i++) {
-      const angle = (i * 360) / RADIAL_RAYS;
-      const rad = (angle * Math.PI) / 180;
-      const inner = 51;
-      const outer = 55;
-      const line = document.createElementNS(ns, "line");
-      line.dataset.cos = Math.cos(rad).toFixed(4);
-      line.dataset.sin = Math.sin(rad).toFixed(4);
-      line.setAttribute("x1", (74 + inner * Math.cos(rad)).toFixed(1));
-      line.setAttribute("y1", (74 + inner * Math.sin(rad)).toFixed(1));
-      line.setAttribute("x2", (74 + outer * Math.cos(rad)).toFixed(1));
-      line.setAttribute("y2", (74 + outer * Math.sin(rad)).toFixed(1));
-      svg.appendChild(line);
-    }
-    return svg;
+  function buildLiquidPulseRings() {
+    const wrap = document.createElement("div");
+    wrap.className = "jana-pulse-rings";
+    wrap.setAttribute("aria-hidden", "true");
+    wrap.innerHTML =
+      '<span class="jana-pulse-ring r1"></span>' +
+      '<span class="jana-pulse-ring r2"></span>' +
+      '<span class="jana-pulse-ring r3"></span>';
+    return wrap;
   }
 
   function tryBindRemoteAudioAnalyser() {
@@ -393,7 +380,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!ctx) return 0;
       const w = canvas.width;
       const h = canvas.height;
-      // Cognigy draws taller bars into the top/bottom 30% of the canvas ONLY when agent speaks
       const topStrip = ctx.getImageData(0, Math.floor(h * 0.12), w, Math.max(2, Math.floor(h * 0.22))).data;
       let lit = 0;
       for (let i = 3; i < topStrip.length; i += 16) {
@@ -409,10 +395,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (eqAnimFrame) return;
     const freqData = new Uint8Array(64);
 
-    function tick(now) {
+    function tick() {
       const waveOrb = container.querySelector(".webrtc_widget_audio_wave");
-      const eqSvg = waveOrb && waveOrb.querySelector(".jana-radial-eq");
-      if (!waveOrb || !eqSvg) {
+      if (!waveOrb) {
         eqAnimFrame = null;
         return;
       }
@@ -420,8 +405,6 @@ document.addEventListener("DOMContentLoaded", () => {
       tryBindRemoteAudioAnalyser();
 
       let speakingLevel = 0;
-      let hasFreqBins = false;
-
       if (eqAnalyser) {
         eqAnalyser.getByteFrequencyData(freqData);
         let sum = 0;
@@ -429,11 +412,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const avg = sum / (27 * 255);
         if (avg > 0.025) {
           speakingLevel = Math.min(1, avg * 2.6);
-          hasFreqBins = true;
         }
       }
 
-      // Fallback: sample Cognigy's own agent-voice canvas if WebAudio stream isn't exposed
       if (speakingLevel < 0.05) {
         const canvasLevel = sampleCognigyCanvasActivity(waveOrb);
         if (canvasLevel > 0.08) {
@@ -441,31 +422,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      const isSpeaking = speakingLevel > 0.06;
+      smoothedVoiceLevel += (speakingLevel - smoothedVoiceLevel) * (speakingLevel > 0.05 ? 0.28 : 0.14);
+      const isSpeaking = smoothedVoiceLevel > 0.05;
       waveOrb.classList.toggle("is-speaking", isSpeaking);
-
-      const lines = eqSvg.children;
-      const t = now * 0.008;
-      for (let i = 0; i < lines.length; i++) {
-        let target = 0;
-        if (isSpeaking) {
-          if (hasFreqBins) {
-            const bin = freqData[(i % 24) + 2] / 255;
-            target = Math.max(0.15, Math.min(1, bin * 1.45));
-          } else {
-            const wave = 0.5 + 0.5 * Math.sin(t + i * 0.7) * Math.cos(t * 0.65 - i * 0.45);
-            target = speakingLevel * (0.28 + 0.72 * wave);
-          }
-        }
-        // Smooth spring toward target (0 = calm neutral short circle)
-        eqSmoothed[i] += (target - eqSmoothed[i]) * (isSpeaking ? 0.28 : 0.16);
-        const outer = 55 + eqSmoothed[i] * 17;
-        const c = parseFloat(lines[i].dataset.cos);
-        const s = parseFloat(lines[i].dataset.sin);
-        lines[i].setAttribute("x2", (74 + outer * c).toFixed(1));
-        lines[i].setAttribute("y2", (74 + outer * s).toFixed(1));
-        lines[i].setAttribute("stroke-width", (2.1 + eqSmoothed[i] * 1.6).toFixed(2));
-      }
+      waveOrb.style.setProperty("--voice-level", smoothedVoiceLevel.toFixed(3));
 
       eqAnimFrame = requestAnimationFrame(tick);
     }
@@ -484,11 +444,11 @@ document.addEventListener("DOMContentLoaded", () => {
       avatarBox.appendChild(img);
     }
 
-    // Active-call voice orb avatar + 360° live voice-reactive equalizer ring
+    // Active-call voice orb avatar + liquid concentric pulse rings
     const waveOrb = container.querySelector(".webrtc_widget_audio_wave");
     if (waveOrb) {
-      if (!waveOrb.querySelector(".jana-radial-eq")) {
-        waveOrb.prepend(buildRadialEqSvg());
+      if (!waveOrb.querySelector(".jana-pulse-rings")) {
+        waveOrb.prepend(buildLiquidPulseRings());
       }
       if (!waveOrb.querySelector(".jana-orb-avatar-img")) {
         const orbImg = document.createElement("img");
@@ -498,6 +458,18 @@ document.addEventListener("DOMContentLoaded", () => {
         waveOrb.prepend(orbImg);
       }
       startRadialEqLoop(container);
+    }
+
+    // Place timer neatly inside the horizontal call controls dock (Mute · 00:43 · End)
+    const controlsDock = container.querySelector(".webrtc_widget_call_controls_container");
+    const durationEl = container.querySelector(".webrtc_widget_call_duration");
+    const endBtn = container.querySelector(".webrtc_widget_end_call_button");
+    if (controlsDock && durationEl && durationEl.parentElement !== controlsDock) {
+      if (endBtn && endBtn.parentElement === controlsDock) {
+        controlsDock.insertBefore(durationEl, endBtn);
+      } else {
+        controlsDock.appendChild(durationEl);
+      }
     }
 
     // Force transcript wrapper (.webrtc_widget_transcript_wrapper) to the BOTTOM of its flex parent
