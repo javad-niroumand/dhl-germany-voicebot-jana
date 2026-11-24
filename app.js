@@ -91,6 +91,10 @@ function escapeHtml(str) {
 function formatSimpleMarkdown(str) {
   return escapeHtml(str)
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(
+      /(https?:\/\/[^\s<]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer" class="jana-xapp-btn">DHL Formular &amp; Foto-Upload öffnen ↗</a>'
+    )
     .replace(/\n/g, "<br>");
 }
 
