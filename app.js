@@ -137,12 +137,14 @@ document.addEventListener("DOMContentLoaded", () => {
     xappIframe.src = url;
     if (xappExternalLink) xappExternalLink.href = url;
     xappModal.hidden = false;
+    if (drawer) drawer.classList.add("is-xapp-open");
   }
 
   function closeLiveFlowModal() {
     if (!xappModal || !xappIframe) return;
     xappModal.hidden = true;
     xappIframe.src = "about:blank";
+    if (drawer) drawer.classList.remove("is-xapp-open");
   }
 
   if (xappCloseBtn) xappCloseBtn.addEventListener("click", closeLiveFlowModal);

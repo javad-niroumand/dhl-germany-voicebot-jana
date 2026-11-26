@@ -1136,6 +1136,54 @@ body {
     0 32px 80px rgba(0, 0, 0, 0.72),
     0 0 0 1px rgba(255, 255, 255, 0.06) inset;
   animation: studioIn 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.jana-studio.is-xapp-open {
+  width: min(840px, calc(100vw - 32px));
+}
+
+.jana-studio-split {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+}
+
+.jana-console-col {
+  width: 380px;
+  max-width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.jana-xapp-pane[hidden] {
+  display: none !important;
+}
+
+.jana-xapp-pane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f2f0eb;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 899px) {
+  .jana-studio.is-xapp-open {
+    width: calc(100vw - 24px);
+  }
+
+  .jana-xapp-pane {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    border-right: 0;
+  }
 }
 
 .jana-studio[hidden] {
