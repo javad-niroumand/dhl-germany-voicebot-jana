@@ -131,11 +131,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const xappCloseBtn = document.getElementById("janaXappCloseBtn");
   const xappIframe = document.getElementById("janaXappIframe");
   const xappExternalLink = document.getElementById("janaXappExternalLink");
+  const xappTitleEl = document.getElementById("janaXappTitle");
 
-  function openLiveFlowModal(url) {
+  function openLiveFlowModal(url, title) {
     if (!url || !xappModal || !xappIframe) return;
     xappIframe.src = url;
     if (xappExternalLink) xappExternalLink.href = url;
+    if (xappTitleEl) xappTitleEl.textContent = title || "DHL Live-Sendungsverfolgung";
     xappModal.hidden = false;
     if (drawer) drawer.classList.add("is-xapp-open");
   }
@@ -186,6 +188,15 @@ document.addEventListener("DOMContentLoaded", () => {
         <img src="./images/jana-avatar.jpg" alt="Jana" class="jana-msg-avatar" />
         <div class="jana-bubble">${formatSimpleMarkdown(text)}</div>
       `;
+      row.querySelectorAll("a.jana-xapp-btn").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          const href = link.getAttribute("href");
+          if (href) {
+            e.preventDefault();
+            openLiveFlowModal(href, "DHL Schadensmeldung & Foto-Upload");
+          }
+        });
+      });
     } else {
       row.innerHTML = `<div class="jana-bubble">${escapeHtml(text)}</div>`;
     }
@@ -321,13 +332,22 @@ document.addEventListener("DOMContentLoaded", () => {
       if (dhlMeta) {
         appendMetadataCard(dhlMeta);
         if (dhlMeta.url && dhlMeta.title && dhlMeta.title.includes("Live-Sendungsverfolgung")) {
-          openLiveFlowModal(dhlMeta.url);
+          openLiveFlowModal(dhlMeta.url, "DHL Live-Sendungsverfolgung");
         }
       }
 
       const xappData = data && data.data && data.data._cognigy && data.data._cognigy._app;
       if (xappData && xappData.url && (!dhlMeta || !dhlMeta.url)) {
-        openLiveFlowModal(xappData.url);
+        const isClaim = cleaned && /schaden|formular|foto/i.test(cleaned);
+        openLiveFlowModal(
+          xappData.url,
+          isClaim ? "DHL Schadensmeldung & Foto-Upload" : "DHL Live-Sendungsverfolgung"
+        );
+      } else if (cleaned && /https:\/\/static-trial\.cognigy\.ai\?token=/i.test(cleaned)) {
+        const match = cleaned.match(/https:\/\/static-trial\.cognigy\.ai\?token=[^\s<]+/i);
+        if (match) {
+          openLiveFlowModal(match[0], "DHL Schadensmeldung & Foto-Upload");
+        }
       }
     });
 
@@ -661,8 +681,11 @@ document.addEventListener("DOMContentLoaded", () => {
               const rawBody = (ev && ev.info && ev.info.body) || (ev && ev.body) || "";
               const parsed = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
               const payload = (parsed && parsed.data) || parsed;
-              if (payload && payload.action === "Live flow" && payload.url) {
-                openLiveFlowModal(payload.url);
+              if (payload && payload.url && (payload.action === "Live flow" || payload.action === "claim")) {
+                const title = payload.action === "claim"
+                  ? "DHL Schadensmeldung & Foto-Upload"
+                  : "DHL Live-Sendungsverfolgung";
+                openLiveFlowModal(payload.url, title);
               }
             } catch {
               // Ignore non-JSON SIP INFO frames
