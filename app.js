@@ -192,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ? `<img src="${escapeHtml(meta.imageUrl)}" alt="${escapeHtml(meta.title || "DHL")}" class="jana-meta-img" loading="lazy" />`
       : "";
     const linkHtml = meta.url
-      ? `<a href="${escapeHtml(meta.url)}" target="_blank" rel="noopener noreferrer" class="jana-xapp-btn">Mehr auf DHL.de erfahren ↗</a>`
+      ? `<a href="${escapeHtml(meta.url)}" target="_blank" rel="noopener noreferrer" class="jana-xapp-btn">${escapeHtml(meta.ctaLabel || "Mehr auf DHL.de erfahren ↗")}</a>`
       : "";
     row.innerHTML = `
       <img src="./images/jana-avatar.jpg" alt="Jana" class="jana-msg-avatar" />
