@@ -2383,6 +2383,25 @@ body {
   border: 1px solid rgba(255, 204, 0, 0.4);
 }
 
+@media (min-width: 900px) {
+  .jana-xapp-modal {
+    inset: auto 448px 24px auto;
+    padding: 0;
+    pointer-events: none;
+  }
+
+  .jana-xapp-backdrop {
+    display: none;
+  }
+
+  .jana-xapp-sheet {
+    pointer-events: auto;
+    width: 440px;
+    height: min(680px, calc(100vh - 48px));
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
+  }
+}
+
 .jana-xapp-head {
   background: #ffcc00;
   color: #1a1a1a;

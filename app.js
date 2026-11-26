@@ -235,6 +235,13 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
     chatMessagesEl.appendChild(row);
+    const btn = row.querySelector(".jana-xapp-btn");
+    if (btn && meta.url) {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        openLiveFlowModal(meta.url);
+      });
+    }
     chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
   }
 
@@ -311,6 +318,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const dhlMeta = data && data.data && data.data.dhlMetadata;
       if (dhlMeta) {
         appendMetadataCard(dhlMeta);
+        if (dhlMeta.url && dhlMeta.title && dhlMeta.title.includes("Live-Sendungsverfolgung")) {
+          openLiveFlowModal(dhlMeta.url);
+        }
+      }
+
+      const xappData = data && data.data && data.data._cognigy && data.data._cognigy._app;
+      if (xappData && xappData.url && (!dhlMeta || !dhlMeta.url)) {
+        openLiveFlowModal(xappData.url);
       }
     });
 
