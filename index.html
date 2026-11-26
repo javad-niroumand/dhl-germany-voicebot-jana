@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=15" />
+  <link rel="stylesheet" href="./styles.css?v=16" />
 </head>
 <body>
   <!-- Official DHL Yellow Header -->
@@ -702,6 +702,24 @@
         </footer>
       </div>
     </section>
+  </div>
+
+  <!-- Embedded Live-Tracking xApp Iframe Modal (triggered by WebRTC Send Metadata) -->
+  <div class="jana-xapp-modal" id="janaXappModal" role="dialog" aria-modal="true" aria-label="DHL Live-Sendungsverfolgung" hidden>
+    <div class="jana-xapp-backdrop" id="janaXappBackdrop"></div>
+    <div class="jana-xapp-sheet">
+      <header class="jana-xapp-head">
+        <div class="jana-xapp-head-left">
+          <span class="jana-xapp-live-dot" aria-hidden="true"></span>
+          <span class="jana-xapp-head-title">DHL Live-Sendungsverfolgung</span>
+        </div>
+        <div class="jana-xapp-head-actions">
+          <a href="#" target="_blank" rel="noopener noreferrer" class="jana-xapp-ext" id="janaXappExternalLink" title="In neuem Tab öffnen" aria-label="In neuem Tab öffnen">↗</a>
+          <button type="button" class="jana-xapp-close" id="janaXappCloseBtn" aria-label="Live-Tracking schließen">✕</button>
+        </div>
+      </header>
+      <iframe id="janaXappIframe" class="jana-xapp-iframe" title="DHL Live-Sendungsverfolgung" allow="geolocation"></iframe>
+    </div>
   </div>
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" defer></script>

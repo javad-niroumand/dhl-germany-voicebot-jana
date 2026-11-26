@@ -125,6 +125,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const loaderEl = document.getElementById("janaStageLoader");
   const copyHintEl = document.getElementById("janaCopyHint");
 
+  // Embedded xApp Modal elements (WebRTC Live flow)
+  const xappModal = document.getElementById("janaXappModal");
+  const xappBackdrop = document.getElementById("janaXappBackdrop");
+  const xappCloseBtn = document.getElementById("janaXappCloseBtn");
+  const xappIframe = document.getElementById("janaXappIframe");
+  const xappExternalLink = document.getElementById("janaXappExternalLink");
+
+  function openLiveFlowModal(url) {
+    if (!url || !xappModal || !xappIframe) return;
+    xappIframe.src = url;
+    if (xappExternalLink) xappExternalLink.href = url;
+    xappModal.hidden = false;
+  }
+
+  function closeLiveFlowModal() {
+    if (!xappModal || !xappIframe) return;
+    xappModal.hidden = true;
+    xappIframe.src = "about:blank";
+  }
+
+  if (xappCloseBtn) xappCloseBtn.addEventListener("click", closeLiveFlowModal);
+  if (xappBackdrop) xappBackdrop.addEventListener("click", closeLiveFlowModal);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && xappModal && !xappModal.hidden) {
+      closeLiveFlowModal();
+    }
+  });
+
   let activeMode = "chat";
   let webrtcInitialized = false;
   let webrtcInitializing = false;
@@ -607,7 +635,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      await window.initWebRTCWidget(COGNIGY_WEBRTC_ENDPOINT, {});
+      const widget = await window.initWebRTCWidget(COGNIGY_WEBRTC_ENDPOINT, {});
+      if (widget && typeof widget.on === "function") {
+        widget.on("session", (session) => {
+          if (!session || typeof session.on !== "function") return;
+          session.on("newInfo", (ev) => {
+            try {
+              const rawBody = (ev && ev.info && ev.info.body) || (ev && ev.body) || "";
+              const parsed = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
+              const payload = (parsed && parsed.data) || parsed;
+              if (payload && payload.action === "Live flow" && payload.url) {
+                openLiveFlowModal(payload.url);
+              }
+            } catch {
+              // Ignore non-JSON SIP INFO frames
+            }
+          });
+        });
+      }
       let wrapper = null;
       for (let i = 0; i < 25; i++) {
         wrapper = document.querySelector(".webrtc_widget_outer_wrapper");
@@ -699,7 +744,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !drawer.hidden) {
+    if (e.key === "Escape" && !drawer.hidden && (!xappModal || xappModal.hidden)) {
       closeJanaWidget();
     }
   });
