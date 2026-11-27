@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=19" />
+  <link rel="stylesheet" href="./styles.css?v=20" />
 </head>
 <body>
   <!-- Official DHL Yellow Header -->
@@ -493,22 +493,27 @@
        BESPOKE DHL JANA CONCIERGE — UNIFIED WEBCHAT & WEBRTC VOICE WIDGET
        ===================================================================== -->
   <div class="jana-widget-root" id="janaWidgetRoot">
-    <!-- Floating Cute Avatar Launcher -->
+    <!-- Floating Dual-Avatar Launcher (Marie & Jana) -->
     <button
       type="button"
       class="jana-launcher"
       id="janaLauncher"
       aria-expanded="false"
       aria-controls="janaDrawer"
-      aria-label="DHL Assistentin Jana öffnen"
+      aria-label="DHL Service-Team Marie und Jana öffnen"
     >
       <span class="jana-launcher-glow" aria-hidden="true"></span>
-      <span class="jana-launcher-avatar-wrap" aria-hidden="true">
-        <img src="./images/jana-avatar.jpg" alt="" class="jana-launcher-avatar" />
-        <span class="jana-online-ring"></span>
+      <span class="jana-launcher-avatars" aria-hidden="true">
+        <span class="jana-launcher-avatar-wrap is-primary">
+          <img src="./images/marie-avatar.jpg" alt="" class="jana-launcher-avatar" />
+        </span>
+        <span class="jana-launcher-avatar-wrap is-secondary">
+          <img src="./images/jana-avatar.jpg" alt="" class="jana-launcher-avatar" />
+          <span class="jana-online-ring"></span>
+        </span>
       </span>
       <span class="jana-launcher-text">
-        <strong>Frag Jana</strong>
+        <strong>Marie &amp; Jana</strong>
         <small><span class="live-pip"></span>Chat &amp; Sprache · Live</small>
       </span>
       <span class="jana-launcher-arrow" aria-hidden="true">

@@ -1043,15 +1043,31 @@ body {
   100% { transform: scale(1.06, 1.24); opacity: 0; }
 }
 
+.jana-launcher-avatars {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .jana-launcher-avatar-wrap {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   flex-shrink: 0;
   padding: 2px;
   background: linear-gradient(135deg, #ffcc00 0%, #d40511 100%);
   box-shadow: 0 6px 18px rgba(212, 5, 17, 0.35);
+}
+
+.jana-launcher-avatar-wrap.is-primary {
+  z-index: 2;
+}
+
+.jana-launcher-avatar-wrap.is-secondary {
+  z-index: 1;
+  margin-left: -14px;
+  box-shadow: 0 0 0 2.5px #141418, 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
 .jana-launcher-avatar {
