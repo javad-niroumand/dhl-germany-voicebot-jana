@@ -197,79 +197,23 @@ document.addEventListener("DOMContentLoaded", () => {
   let turnTextParts = [];
   let turnQuickReplies = [];
   let turnFlushTimer = null;
-  let activeBotRow = null;
-  let activeBotBubble = null;
   const pendingMessages = [];
   const chatUserId = createSessionId("dhl-user");
   const chatSessionId = createSessionId("dhl-chat");
-
-  function appendProgressiveChunk(text, quickReplies) {
-    if (!chatMessagesEl || !text) return;
-    if (turnFlushTimer) {
-      clearTimeout(turnFlushTimer);
-      turnFlushTimer = null;
-    }
-    turnTextParts.push(text);
-    if (Array.isArray(quickReplies) && quickReplies.length > 0) {
-      turnQuickReplies = turnQuickReplies.concat(quickReplies);
-    }
-
-    const combined = turnTextParts.join(" ").replace(/\s+([.,!?])/g, "$1").trim();
-    if (!activeBotRow) {
-      activeBotRow = document.createElement("div");
-      activeBotRow.className = "jana-msg-row is-bot";
-      activeBotRow.innerHTML = `
-        <img src="./images/marie-avatar.jpg" alt="Marie" class="jana-msg-avatar" />
-        <div class="jana-bubble"></div>
-      `;
-      activeBotBubble = activeBotRow.querySelector(".jana-bubble");
-      chatMessagesEl.appendChild(activeBotRow);
-    }
-    if (activeBotBubble) {
-      activeBotBubble.innerHTML = formatSimpleMarkdown(combined);
-      activeBotBubble.querySelectorAll("a.jana-xapp-btn").forEach((link) => {
-        link.addEventListener("click", (e) => {
-          const href = link.getAttribute("href");
-          if (href) {
-            e.preventDefault();
-            openLiveFlowModal(href, "DHL Schadensmeldung & Foto-Upload");
-          }
-        });
-      });
-    }
-    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-    turnFlushTimer = setTimeout(flushTurnBubble, 1800);
-  }
 
   function flushTurnBubble() {
     if (turnFlushTimer) {
       clearTimeout(turnFlushTimer);
       turnFlushTimer = null;
     }
-    if (turnQuickReplies.length > 0 && chatMessagesEl) {
-      const qrWrap = document.createElement("div");
-      qrWrap.className = "jana-msg-quick-replies";
-      turnQuickReplies.forEach((qr) => {
-        const title = qr.title || qr.text || qr.payload;
-        const payload = qr.payload || title;
-        if (!title) return;
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "jana-qr-btn";
-        btn.textContent = title;
-        btn.addEventListener("click", () => {
-          qrWrap.remove();
-          sendChatMessage(title, payload);
-        });
-        qrWrap.appendChild(btn);
-      });
-      chatMessagesEl.appendChild(qrWrap);
-      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-    }
+    if (turnTextParts.length === 0) return;
+    const combined = turnTextParts.join(" ").replace(/\s+([.,!?])/g, "$1").trim();
+    const qrs = turnQuickReplies.slice();
     turnTextParts = [];
     turnQuickReplies = [];
-    activeBotRow = null;
-    activeBotBubble = null;
+    if (combined) {
+      appendChatMessage("bot", combined, qrs);
+    }
   }
 
   function setStatus(text, isLive) {
@@ -428,7 +372,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (cleaned) {
-        appendProgressiveChunk(cleaned, quickReplies);
+        turnTextParts.push(cleaned);
+        if (quickReplies.length > 0) {
+          turnQuickReplies = turnQuickReplies.concat(quickReplies);
+        }
+        if (turnFlushTimer) clearTimeout(turnFlushTimer);
+        turnFlushTimer = setTimeout(flushTurnBubble, 900);
       }
 
       const dhlMeta = data && data.data && data.data.dhlMetadata;
