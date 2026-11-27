@@ -2544,37 +2544,3 @@ body {
 .jana-md-list li {
   line-height: 1.4;
 }
-
-/* ==========================================================================
-   NATIVE COGNIGY WEBCHAT V3 MOUNT INSIDE #janaChatPanel
-   ========================================================================== */
-.jana-webchat-mount {
-  flex: 1;
-  min-height: 460px;
-  height: 480px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: #121216;
-}
-
-[data-cognigy-webchat-toggle] {
-  display: none !important;
-}
-
-#janaChatMount [data-cognigy-webchat] {
-  position: relative !important;
-  inset: auto !important;
-  width: 100% !important;
-  height: 100% !important;
-  max-height: none !important;
-  min-height: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  z-index: 1 !important;
-}
-
-#janaChatMount [data-cognigy-webchat-header] {
-  display: none !important;
-}

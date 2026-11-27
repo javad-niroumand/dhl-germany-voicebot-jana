@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=21" />
+  <link rel="stylesheet" href="./styles.css?v=20" />
 </head>
 <body>
   <!-- Official DHL Yellow Header -->
@@ -625,9 +625,71 @@
         </button>
       </div>
 
-      <!-- ===================== CHANNEL 1: WEBCHAT (COGNIGY WEBCHAT V3) ===================== -->
+      <!-- ===================== CHANNEL 1: WEBCHAT ===================== -->
       <div class="jana-panel" id="janaChatPanel" role="tabpanel" aria-labelledby="janaTabChat">
-        <div class="jana-webchat-mount" id="janaChatMount"></div>
+        <div class="jana-chat-scroll" id="janaChatMessages" aria-live="polite">
+          <!-- Welcome Card with Marie Avatar -->
+          <div class="jana-chat-welcome">
+            <img src="./images/marie-avatar.jpg" alt="Marie" class="jana-welcome-avatar" id="janaWelcomeAvatar" />
+            <h3 id="janaWelcomeTitle">Hallo! Ich bin Marie</h3>
+            <p>Ihre digitale DHL Kundenservice-Assistentin im Chat. Schreiben Sie mir Ihre Sendungsnummer und PLZ – ich helfe sofort.</p>
+          </div>
+
+          <!-- Starter Quick Actions -->
+          <div class="jana-starters" id="janaChatStarters">
+            <button type="button" class="jana-starter-btn" data-prompt="Mein Paket ist beschädigt angekommen, ich möchte eine Schadensmeldung aufgeben.">
+              <span class="chip-dot is-red"></span>
+              Beschädigtes Paket melden (Schadensmeldung)
+            </button>
+            <button type="button" class="jana-starter-btn" data-prompt="Wo ist mein Paket 825643754000?">
+              <span class="chip-dot is-amber"></span>
+              Status 825643754000 (Nachforschung)
+            </button>
+            <button type="button" class="jana-starter-btn" data-prompt="Wie ist der Status meiner Sendung 003404302811?">
+              <span class="chip-dot is-green"></span>
+              Status 003404302811 (Zustellung)
+            </button>
+          </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="jana-typing" id="janaTypingIndicator" hidden>
+          <img src="./images/marie-avatar.jpg" alt="" class="jana-msg-avatar" id="janaTypingAvatar" />
+          <div class="jana-typing-dots" aria-label="Marie schreibt">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- Sleek Chat Composer -->
+        <form class="jana-composer" id="janaChatForm" autocomplete="off">
+          <input
+            type="text"
+            id="janaChatInput"
+            class="jana-composer-input"
+            placeholder="Nachricht an Jana schreiben…"
+            aria-label="Nachricht an Jana"
+            maxlength="500"
+          />
+          <button
+            type="button"
+            class="jana-composer-mic"
+            id="janaSwitchToVoiceBtn"
+            title="Stattdessen sprechen"
+            aria-label="Zu Sprachanruf wechseln"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </button>
+          <button type="submit" class="jana-composer-send" aria-label="Nachricht senden">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </form>
       </div>
 
       <!-- ===================== CHANNEL 2: LIVE VOICE (WEBRTC) ===================== -->
@@ -666,7 +728,7 @@
     </section>
   </div>
 
-  <script src="https://webchat-trial.cognigy.ai/build/webchat3.js" defer></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" defer></script>
   <script src="https://static-trial.cognigy.ai/webrtc/webRTCWidget.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
