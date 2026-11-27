@@ -58,9 +58,8 @@ const CALC_PRODUCTS = {
   "20": { name: "Paket 20 kg", price: "18,99 €", tracking: true, insurance: true },
 };
 
-const COGNIGY_SOCKET_HOST = "https://endpoint-trial.cognigy.ai";
-const COGNIGY_WEBCHAT_TOKEN =
-  "4347a89d2a38449e9b77ae96a3145b66f15050b66b771dfbb5e6665583f97979";
+const COGNIGY_WEBCHAT_ENDPOINT =
+  "https://endpoint-trial.cognigy.ai/4347a89d2a38449e9b77ae96a3145b66f15050b66b771dfbb5e6665583f97979";
 const COGNIGY_WEBCHAT_DEMO_URL =
   "https://webchat-trial.cognigy.ai/v3/4347a89d2a38449e9b77ae96a3145b66f15050b66b771dfbb5e6665583f97979";
 const COGNIGY_WEBRTC_ENDPOINT =
@@ -142,12 +141,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const voicePanel = document.getElementById("janaVoicePanel");
   const switchToVoiceBtn = document.getElementById("janaSwitchToVoiceBtn");
 
-  // Chat elements
-  const chatMessagesEl = document.getElementById("janaChatMessages");
-  const chatStartersEl = document.getElementById("janaChatStarters");
-  const typingEl = document.getElementById("janaTypingIndicator");
-  const chatForm = document.getElementById("janaChatForm");
-  const chatInput = document.getElementById("janaChatInput");
+  // Chat mount
+  const chatMountEl = document.getElementById("janaChatMount");
 
   // Voice elements
   const mountEl = document.getElementById("janaWebrtcMount");
@@ -187,90 +182,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   let activeMode = "chat";
+  let webchatInstance = null;
+  let webchatInitialized = false;
+  let webchatInitializing = false;
   let webrtcInitialized = false;
   let webrtcInitializing = false;
-
-  // Socket.IO Webchat state
-  let socket = null;
-  let socketConnected = false;
-  let chatAutoStarted = false;
-  let turnTextParts = [];
-  let turnQuickReplies = [];
-  let turnFlushTimer = null;
-  let activeBotRow = null;
-  let activeBotBubble = null;
-  const pendingMessages = [];
-  const chatUserId = createSessionId("dhl-user");
-  const chatSessionId = createSessionId("dhl-chat");
-
-  function appendProgressiveChunk(text, quickReplies) {
-    if (!chatMessagesEl || !text) return;
-    if (turnFlushTimer) {
-      clearTimeout(turnFlushTimer);
-      turnFlushTimer = null;
-    }
-    turnTextParts.push(text);
-    if (Array.isArray(quickReplies) && quickReplies.length > 0) {
-      turnQuickReplies = turnQuickReplies.concat(quickReplies);
-    }
-
-    const combined = turnTextParts.join(" ").replace(/\s+([.,!?])/g, "$1").trim();
-    if (!activeBotRow) {
-      activeBotRow = document.createElement("div");
-      activeBotRow.className = "jana-msg-row is-bot";
-      activeBotRow.innerHTML = `
-        <img src="./images/marie-avatar.jpg" alt="Marie" class="jana-msg-avatar" />
-        <div class="jana-bubble"></div>
-      `;
-      activeBotBubble = activeBotRow.querySelector(".jana-bubble");
-      chatMessagesEl.appendChild(activeBotRow);
-    }
-    if (activeBotBubble) {
-      activeBotBubble.innerHTML = formatSimpleMarkdown(combined);
-      activeBotBubble.querySelectorAll("a.jana-xapp-btn").forEach((link) => {
-        link.addEventListener("click", (e) => {
-          const href = link.getAttribute("href");
-          if (href) {
-            e.preventDefault();
-            openLiveFlowModal(href, "DHL Schadensmeldung & Foto-Upload");
-          }
-        });
-      });
-    }
-    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-    turnFlushTimer = setTimeout(flushTurnBubble, 1800);
-  }
-
-  function flushTurnBubble() {
-    if (turnFlushTimer) {
-      clearTimeout(turnFlushTimer);
-      turnFlushTimer = null;
-    }
-    if (turnQuickReplies.length > 0 && chatMessagesEl) {
-      const qrWrap = document.createElement("div");
-      qrWrap.className = "jana-msg-quick-replies";
-      turnQuickReplies.forEach((qr) => {
-        const title = qr.title || qr.text || qr.payload;
-        const payload = qr.payload || title;
-        if (!title) return;
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "jana-qr-btn";
-        btn.textContent = title;
-        btn.addEventListener("click", () => {
-          qrWrap.remove();
-          sendChatMessage(title, payload);
-        });
-        qrWrap.appendChild(btn);
-      });
-      chatMessagesEl.appendChild(qrWrap);
-      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-    }
-    turnTextParts = [];
-    turnQuickReplies = [];
-    activeBotRow = null;
-    activeBotBubble = null;
-  }
 
   function setStatus(text, isLive) {
     if (statusTextEl) {
@@ -281,223 +197,87 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function appendChatMessage(sender, text, quickReplies) {
-    if (!chatMessagesEl || !text) return;
-    const row = document.createElement("div");
-    row.className = "jana-msg-row " + (sender === "user" ? "is-user" : "is-bot");
+  async function mountNativeWebchat() {
+    if (webchatInitialized || webchatInitializing) return;
+    webchatInitializing = true;
 
-    if (sender === "bot") {
-      row.innerHTML = `
-        <img src="./images/marie-avatar.jpg" alt="Marie" class="jana-msg-avatar" />
-        <div class="jana-bubble">${formatSimpleMarkdown(text)}</div>
-      `;
-      row.querySelectorAll("a.jana-xapp-btn").forEach((link) => {
-        link.addEventListener("click", (e) => {
-          const href = link.getAttribute("href");
-          if (href) {
-            e.preventDefault();
-            openLiveFlowModal(href, "DHL Schadensmeldung & Foto-Upload");
-          }
-        });
-      });
-    } else {
-      row.innerHTML = `<div class="jana-bubble">${escapeHtml(text)}</div>`;
-    }
-    chatMessagesEl.appendChild(row);
-
-    if (Array.isArray(quickReplies) && quickReplies.length > 0) {
-      const qrWrap = document.createElement("div");
-      qrWrap.className = "jana-msg-quick-replies";
-      quickReplies.forEach((qr) => {
-        const title = qr.title || qr.text || qr.payload;
-        const payload = qr.payload || title;
-        if (!title) return;
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "jana-qr-btn";
-        btn.textContent = title;
-        btn.addEventListener("click", () => {
-          qrWrap.remove();
-          sendChatMessage(title, payload);
-        });
-        qrWrap.appendChild(btn);
-      });
-      chatMessagesEl.appendChild(qrWrap);
+    const deadline = Date.now() + 5000;
+    while (typeof window.initWebchat !== "function" && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 120));
     }
 
-    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-  }
-
-  function appendMetadataCard(meta) {
-    if (!chatMessagesEl || !meta || (!meta.url && !meta.title)) return;
-    const row = document.createElement("div");
-    row.className = "jana-msg-row is-bot";
-    const imgHtml = meta.imageUrl
-      ? `<img src="${escapeHtml(meta.imageUrl)}" alt="${escapeHtml(meta.title || "DHL")}" class="jana-meta-img" loading="lazy" />`
-      : "";
-    const linkHtml = meta.url
-      ? `<a href="${escapeHtml(meta.url)}" target="_blank" rel="noopener noreferrer" class="jana-xapp-btn">${escapeHtml(meta.ctaLabel || "Mehr auf DHL.de erfahren ↗")}</a>`
-      : "";
-    row.innerHTML = `
-      <img src="./images/jana-avatar.jpg" alt="Jana" class="jana-msg-avatar" />
-      <div class="jana-meta-card">
-        ${imgHtml}
-        <div class="jana-meta-body">
-          <span class="jana-meta-kicker">DHL SERVICE-INFO</span>
-          <h4>${escapeHtml(meta.title || "DHL Information")}</h4>
-          ${meta.description ? `<p>${escapeHtml(meta.description)}</p>` : ""}
-          ${linkHtml}
-        </div>
-      </div>
-    `;
-    chatMessagesEl.appendChild(row);
-    const btn = row.querySelector(".jana-xapp-btn");
-    if (btn && meta.url) {
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        openLiveFlowModal(meta.url);
-      });
-    }
-    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-  }
-
-  function setTyping(visible) {
-    if (typingEl) typingEl.hidden = !visible;
-    if (visible && chatMessagesEl) {
-      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-    }
-  }
-
-  function ensureWebchatSocket() {
-    if (socket) return;
-    if (typeof window.io !== "function") {
-      appendChatMessage(
-        "bot",
-        "Die Chat-Verbindung wird geladen – alternativ können Sie den Vollbild-Webchat oben rechts öffnen."
-      );
+    if (typeof window.initWebchat !== "function") {
+      webchatInitializing = false;
+      if (chatMountEl) {
+        chatMountEl.innerHTML = `
+          <div class="jana-stage-fallback">
+            <p>Der Webchat konnte nicht geladen werden.</p>
+            <a href="${COGNIGY_WEBCHAT_DEMO_URL}" target="_blank" rel="noopener noreferrer" class="btn-dhl-red">
+              Webchat im Vollbild öffnen ↗
+            </a>
+          </div>
+        `;
+      }
       return;
     }
 
-    setStatus("Verbinde mit DHL Webchat…", false);
-    socket = window.io(COGNIGY_SOCKET_HOST, {
-      transports: ["websocket", "polling"],
-      reconnectionAttempts: 5,
-      query: {
-        urlToken: COGNIGY_WEBCHAT_TOKEN,
-        userId: chatUserId,
-        sessionId: chatSessionId,
+    window.initWebchat(
+      COGNIGY_WEBCHAT_ENDPOINT,
+      {
+        settings: {
+          embeddingConfiguration: {
+            awaitEndpointConfig: true,
+            useSessionStorage: false,
+          },
+          behavior: {
+            focusInputAfterPostback: true,
+          },
+        },
       },
-    });
+      (webchat) => {
+        webchatInstance = webchat;
+        webchatInitialized = true;
+        webchatInitializing = false;
 
-    socket.on("connect", () => {
-      socketConnected = true;
-      if (activeMode === "chat") {
-        setStatus("Online · Verbunden mit DHL Webchat", false);
-      }
-      if (!chatAutoStarted && pendingMessages.length === 0) {
-        chatAutoStarted = true;
-        setTyping(true);
-        emitCognigyInput("Hallo", { autoStart: true });
-      }
-      while (pendingMessages.length > 0) {
-        chatAutoStarted = true;
-        const item = pendingMessages.shift();
-        emitCognigyInput(item.text, item.data);
-      }
-    });
+        const root = document.querySelector("[data-cognigy-webchat-root], [data-cognigy-webchat]");
+        if (root && chatMountEl && root.parentElement !== chatMountEl) {
+          chatMountEl.appendChild(root);
+        }
 
-    socket.on("typingStatus", (payload) => {
-      if (payload && payload.status === "typingOn") {
-        setTyping(true);
-      } else if (payload && payload.status === "typingOff") {
-        setTyping(false);
-      }
-    });
+        if (typeof webchat.registerAnalyticsService === "function") {
+          webchat.registerAnalyticsService((event) => {
+            if (!event || event.type !== "webchat/incoming-message") return;
+            const msg = event.payload || {};
+            const d = msg.data || {};
+            const meta = d.dhlMetadata;
+            if (meta && meta.url && meta.title && meta.title.includes("Live-Sendungsverfolgung")) {
+              openLiveFlowModal(meta.url, "DHL Live-Sendungsverfolgung");
+              return;
+            }
+            const xapp = d._cognigy && d._cognigy._app;
+            if (xapp && xapp.url) {
+              const isClaim = msg.text && /schaden|formular|foto/i.test(msg.text);
+              openLiveFlowModal(
+                xapp.url,
+                isClaim ? "DHL Schadensmeldung & Foto-Upload" : "DHL Live-Sendungsverfolgung"
+              );
+            }
+          });
+        }
 
-    socket.on("output", (payload) => {
-      setTyping(false);
-      const data = payload && payload.data ? payload.data : payload;
-      const rawText = data && data.text ? data.text : "";
-      const cleaned = cleanBotText(rawText);
-
-      // Extract optional Cognigy Webchat quick replies
-      let quickReplies = [];
-      const cog = data && data.data && data.data._cognigy && data.data._cognigy._default;
-      if (cog && cog._quickReplies && Array.isArray(cog._quickReplies.quickReplies)) {
-        quickReplies = cog._quickReplies.quickReplies;
-      }
-
-      if (cleaned) {
-        appendProgressiveChunk(cleaned, quickReplies);
-      }
-
-      const dhlMeta = data && data.data && data.data.dhlMetadata;
-      if (dhlMeta) {
-        appendMetadataCard(dhlMeta);
-        if (dhlMeta.url && dhlMeta.title && dhlMeta.title.includes("Live-Sendungsverfolgung")) {
-          openLiveFlowModal(dhlMeta.url, "DHL Live-Sendungsverfolgung");
+        webchat.open();
+        if (activeMode === "chat") {
+          setStatus("Online · Chat mit Marie", false);
         }
       }
-
-      const xappData = data && data.data && data.data._cognigy && data.data._cognigy._app;
-      if (xappData && xappData.url && (!dhlMeta || !dhlMeta.url)) {
-        const isClaim = cleaned && /schaden|formular|foto/i.test(cleaned);
-        openLiveFlowModal(
-          xappData.url,
-          isClaim ? "DHL Schadensmeldung & Foto-Upload" : "DHL Live-Sendungsverfolgung"
-        );
-      } else if (cleaned && /https:\/\/static-trial\.cognigy\.ai\?token=/i.test(cleaned)) {
-        const match = cleaned.match(/https:\/\/static-trial\.cognigy\.ai\?token=[^\s<]+/i);
-        if (match) {
-          openLiveFlowModal(match[0], "DHL Schadensmeldung & Foto-Upload");
-        }
-      }
-    });
-
-    socket.on("finalPing", () => {
-      flushTurnBubble();
-      setTyping(false);
-    });
-
-    socket.on("exception", () => {
-      setTyping(false);
-      appendChatMessage(
-        "bot",
-        "Entschuldigung, die Verbindung wurde kurz unterbrochen. Bitte versuchen Sie es noch einmal."
-      );
-    });
-
-    socket.on("disconnect", () => {
-      socketConnected = false;
-    });
-  }
-
-  function emitCognigyInput(text, data) {
-    if (!socket) return;
-    socket.emit("processInput", {
-      URLToken: COGNIGY_WEBCHAT_TOKEN,
-      userId: chatUserId,
-      sessionId: chatSessionId,
-      text: text || "",
-      data: data || {},
-      source: "device",
-    });
+    );
   }
 
   function sendChatMessage(displayText, payloadText) {
     const cleanText = String(displayText || "").trim();
     if (!cleanText) return;
-    if (chatStartersEl) chatStartersEl.hidden = true;
-
-    appendChatMessage("user", cleanText);
-    setTyping(true);
-    ensureWebchatSocket();
-
-    const outbound = payloadText || cleanText;
-    if (socket && socketConnected) {
-      emitCognigyInput(outbound, {});
-    } else {
-      pendingMessages.push({ text: outbound, data: {} });
+    if (webchatInstance && typeof webchatInstance.sendMessage === "function") {
+      webchatInstance.sendMessage(payloadText || cleanText);
     }
   }
 
@@ -854,9 +634,8 @@ document.addEventListener("DOMContentLoaded", () => {
         headAvatarEl.src = "./images/marie-avatar.jpg";
         headAvatarEl.alt = "Marie – DHL Assistentin";
       }
-      setStatus(socketConnected ? "Online · Chat mit Marie" : "Online · Chat mit Marie", false);
-      ensureWebchatSocket();
-      setTimeout(() => chatInput && chatInput.focus(), 60);
+      setStatus("Online · Chat mit Marie", false);
+      mountNativeWebchat();
     } else {
       if (studioTitleEl) studioTitleEl.textContent = "Jana";
       if (headAvatarEl) {
