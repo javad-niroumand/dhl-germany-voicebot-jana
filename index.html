@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css?v=18" />
+  <link rel="stylesheet" href="./styles.css?v=19" />
 </head>
 <body>
   <!-- Official DHL Yellow Header -->
@@ -541,24 +541,24 @@
               <button type="button" class="jana-xapp-close" id="janaXappCloseBtn" aria-label="Live-Tracking schließen">✕</button>
             </div>
           </header>
-          <iframe id="janaXappIframe" class="jana-xapp-iframe" title="DHL Live-Sendungsverfolgung" allow="geolocation"></iframe>
+          <iframe id="janaXappIframe" class="jana-xapp-iframe" title="DHL Live-Sendungsverfolgung" allow="camera; microphone; geolocation"></iframe>
         </div>
 
         <div class="jana-console-col">
-          <!-- Unified Header with Cute DHL Avatar -->
+          <!-- Unified Header with Dynamic Marie (Chat) / Jana (Voice) Avatar -->
       <header class="jana-studio-head">
         <div class="jana-studio-identity">
           <div class="jana-head-avatar-wrap">
-            <img src="./images/jana-avatar.jpg" alt="Jana – DHL Assistentin" class="jana-head-avatar" />
+            <img src="./images/marie-avatar.jpg" alt="Marie – DHL Assistentin" class="jana-head-avatar" id="janaHeadAvatar" />
             <span class="jana-head-online" id="janaStatusDot" aria-hidden="true"></span>
           </div>
           <div class="jana-studio-meta">
             <div class="jana-studio-title-row">
-              <h2 class="jana-studio-title">Jana</h2>
+              <h2 class="jana-studio-title" id="janaStudioTitle">Marie</h2>
               <span class="jana-studio-tag">DHL Service</span>
             </div>
             <p class="jana-studio-status" id="janaStatusText">
-              <span>Online · Chat &amp; Sprachassistenz</span>
+              <span>Online · Chat mit Marie</span>
             </p>
           </div>
         </div>
@@ -623,11 +623,11 @@
       <!-- ===================== CHANNEL 1: WEBCHAT ===================== -->
       <div class="jana-panel" id="janaChatPanel" role="tabpanel" aria-labelledby="janaTabChat">
         <div class="jana-chat-scroll" id="janaChatMessages" aria-live="polite">
-          <!-- Welcome Card with Cute Jana Avatar -->
+          <!-- Welcome Card with Marie Avatar -->
           <div class="jana-chat-welcome">
-            <img src="./images/jana-avatar.jpg" alt="Jana" class="jana-welcome-avatar" />
-            <h3>Hallo! Ich bin Jana</h3>
-            <p>Ihre digitale DHL Kundenservice-Assistentin. Schreiben Sie mir Ihre Sendungsnummer oder Frage – ich helfe sofort.</p>
+            <img src="./images/marie-avatar.jpg" alt="Marie" class="jana-welcome-avatar" id="janaWelcomeAvatar" />
+            <h3 id="janaWelcomeTitle">Hallo! Ich bin Marie</h3>
+            <p>Ihre digitale DHL Kundenservice-Assistentin im Chat. Schreiben Sie mir Ihre Sendungsnummer und PLZ – ich helfe sofort.</p>
           </div>
 
           <!-- Starter Quick Actions -->
@@ -649,8 +649,8 @@
 
         <!-- Typing Indicator -->
         <div class="jana-typing" id="janaTypingIndicator" hidden>
-          <img src="./images/jana-avatar.jpg" alt="" class="jana-msg-avatar" />
-          <div class="jana-typing-dots" aria-label="Jana schreibt">
+          <img src="./images/marie-avatar.jpg" alt="" class="jana-msg-avatar" id="janaTypingAvatar" />
+          <div class="jana-typing-dots" aria-label="Marie schreibt">
             <span></span><span></span><span></span>
           </div>
         </div>

@@ -89,13 +89,40 @@ function escapeHtml(str) {
 }
 
 function formatSimpleMarkdown(str) {
-  return escapeHtml(str)
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(
-      /(https?:\/\/[^\s<]+)/g,
-      '<a href="$1" target="_blank" rel="noopener noreferrer" class="jana-xapp-btn">DHL Formular &amp; Foto-Upload öffnen ↗</a>'
-    )
-    .replace(/\n/g, "<br>");
+  const lines = String(str || "").split(/\r?\n/);
+  const out = [];
+  let inList = false;
+
+  const formatInline = (line) =>
+    escapeHtml(line)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(
+        /(https?:\/\/[^\s<]+)/g,
+        '<a href="$1" target="_blank" rel="noopener noreferrer" class="jana-xapp-btn">Formular öffnen ↗</a>'
+      );
+
+  for (const rawLine of lines) {
+    const bullet = rawLine.match(/^\s*[-*•]\s+(.+)$/);
+    if (bullet) {
+      if (!inList) {
+        out.push('<ul class="jana-md-list">');
+        inList = true;
+      }
+      out.push(`<li>${formatInline(bullet[1])}</li>`);
+    } else {
+      if (inList) {
+        out.push("</ul>");
+        inList = false;
+      }
+      if (rawLine.trim()) {
+        out.push(formatInline(rawLine));
+      } else if (out.length > 0) {
+        out.push("<br>");
+      }
+    }
+  }
+  if (inList) out.push("</ul>");
+  return out.join("<br>").replace(/<br><ul/g, "<ul").replace(/<\/ul><br>/g, "</ul>");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -105,6 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const externalLink = document.getElementById("janaExternalLink");
   const statusTextEl = document.getElementById("janaStatusText");
   const statusDotEl = document.getElementById("janaStatusDot");
+  const headAvatarEl = document.getElementById("janaHeadAvatar");
+  const studioTitleEl = document.getElementById("janaStudioTitle");
 
   // Mode tabs & panels
   const tabChat = document.getElementById("janaTabChat");
@@ -165,9 +194,27 @@ document.addEventListener("DOMContentLoaded", () => {
   let socket = null;
   let socketConnected = false;
   let chatAutoStarted = false;
+  let turnTextParts = [];
+  let turnQuickReplies = [];
+  let turnFlushTimer = null;
   const pendingMessages = [];
   const chatUserId = createSessionId("dhl-user");
   const chatSessionId = createSessionId("dhl-chat");
+
+  function flushTurnBubble() {
+    if (turnFlushTimer) {
+      clearTimeout(turnFlushTimer);
+      turnFlushTimer = null;
+    }
+    if (turnTextParts.length === 0) return;
+    const combined = turnTextParts.join(" ").replace(/\s+([.,!?])/g, "$1").trim();
+    const qrs = turnQuickReplies.slice();
+    turnTextParts = [];
+    turnQuickReplies = [];
+    if (combined) {
+      appendChatMessage("bot", combined, qrs);
+    }
+  }
 
   function setStatus(text, isLive) {
     if (statusTextEl) {
@@ -185,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (sender === "bot") {
       row.innerHTML = `
-        <img src="./images/jana-avatar.jpg" alt="Jana" class="jana-msg-avatar" />
+        <img src="./images/marie-avatar.jpg" alt="Marie" class="jana-msg-avatar" />
         <div class="jana-bubble">${formatSimpleMarkdown(text)}</div>
       `;
       row.querySelectorAll("a.jana-xapp-btn").forEach((link) => {
@@ -325,7 +372,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (cleaned) {
-        appendChatMessage("bot", cleaned, quickReplies);
+        turnTextParts.push(cleaned);
+        if (quickReplies.length > 0) {
+          turnQuickReplies = turnQuickReplies.concat(quickReplies);
+        }
+        if (turnFlushTimer) clearTimeout(turnFlushTimer);
+        turnFlushTimer = setTimeout(flushTurnBubble, 900);
       }
 
       const dhlMeta = data && data.data && data.data.dhlMetadata;
@@ -352,6 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     socket.on("finalPing", () => {
+      flushTurnBubble();
       setTyping(false);
     });
 
@@ -745,11 +798,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (isChat) {
-      setStatus(socketConnected ? "Online · Verbunden mit DHL Webchat" : "Online · Chat & Sprachassistenz", false);
+      if (studioTitleEl) studioTitleEl.textContent = "Marie";
+      if (headAvatarEl) {
+        headAvatarEl.src = "./images/marie-avatar.jpg";
+        headAvatarEl.alt = "Marie – DHL Assistentin";
+      }
+      setStatus(socketConnected ? "Online · Chat mit Marie" : "Online · Chat mit Marie", false);
       ensureWebchatSocket();
       setTimeout(() => chatInput && chatInput.focus(), 60);
     } else {
-      setStatus("Bereit · Natürliche Sprachassistenz", false);
+      if (studioTitleEl) studioTitleEl.textContent = "Jana";
+      if (headAvatarEl) {
+        headAvatarEl.src = "./images/jana-avatar.jpg";
+        headAvatarEl.alt = "Jana – DHL Assistentin";
+      }
+      setStatus("Bereit · Sprachassistenz mit Jana", false);
       mountNativeWebRTC();
     }
   }

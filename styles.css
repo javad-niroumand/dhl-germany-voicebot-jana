@@ -2516,3 +2516,15 @@ body {
   border: 0;
   background: #f2f0eb;
 }
+
+.jana-md-list {
+  margin: 6px 0 4px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.jana-md-list li {
+  line-height: 1.4;
+}
