@@ -194,130 +194,25 @@ document.addEventListener("DOMContentLoaded", () => {
   let socket = null;
   let socketConnected = false;
   let chatAutoStarted = false;
-  let activeStreamRow = null;
-  let activeStreamBubble = null;
-  let streamTargetWords = [];
-  let streamShownCount = 0;
-  let streamTimer = null;
+  let turnTextParts = [];
   let turnQuickReplies = [];
-  let turnEndSafetyTimer = null;
+  let turnFlushTimer = null;
   const pendingMessages = [];
   const chatUserId = createSessionId("dhl-user");
   const chatSessionId = createSessionId("dhl-chat");
 
-  function bindXappLinks(containerEl) {
-    if (!containerEl) return;
-    containerEl.querySelectorAll("a.jana-xapp-btn").forEach((link) => {
-      link.addEventListener("click", (e) => {
-        const href = link.getAttribute("href");
-        if (href) {
-          e.preventDefault();
-          openLiveFlowModal(href, "DHL Schadensmeldung & Foto-Upload");
-        }
-      });
-    });
-  }
-
-  function renderStreamProgress() {
-    if (!activeStreamBubble) return;
-    const partial = streamTargetWords.slice(0, streamShownCount).join("").trim();
-    activeStreamBubble.innerHTML = formatSimpleMarkdown(partial);
-    bindXappLinks(activeStreamBubble);
-    if (chatMessagesEl) {
-      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+  function flushTurnBubble() {
+    if (turnFlushTimer) {
+      clearTimeout(turnFlushTimer);
+      turnFlushTimer = null;
     }
-  }
-
-  function startWordStreamer() {
-    if (streamTimer) return;
-    streamTimer = setInterval(() => {
-      if (streamShownCount < streamTargetWords.length) {
-        streamShownCount += 2;
-        if (streamShownCount > streamTargetWords.length) {
-          streamShownCount = streamTargetWords.length;
-        }
-        renderStreamProgress();
-      } else {
-        clearInterval(streamTimer);
-        streamTimer = null;
-      }
-    }, 30);
-  }
-
-  function pushStreamChunk(text, quickReplies) {
-    if (!chatMessagesEl || !text) return;
-    if (turnEndSafetyTimer) {
-      clearTimeout(turnEndSafetyTimer);
-      turnEndSafetyTimer = null;
-    }
-    if (!activeStreamRow) {
-      activeStreamRow = document.createElement("div");
-      activeStreamRow.className = "jana-msg-row is-bot";
-      activeStreamRow.innerHTML = `
-        <img src="./images/marie-avatar.jpg" alt="Marie" class="jana-msg-avatar" />
-        <div class="jana-bubble"></div>
-      `;
-      activeStreamBubble = activeStreamRow.querySelector(".jana-bubble");
-      chatMessagesEl.appendChild(activeStreamRow);
-      streamTargetWords = [];
-      streamShownCount = 0;
-    }
-    const prefix = streamTargetWords.length > 0 ? " " : "";
-    const tokens = (prefix + String(text).trim()).split(/(\s+)/).filter(Boolean);
-    streamTargetWords = streamTargetWords.concat(tokens);
-    if (Array.isArray(quickReplies) && quickReplies.length > 0) {
-      turnQuickReplies = turnQuickReplies.concat(quickReplies);
-    }
-    startWordStreamer();
-    turnEndSafetyTimer = setTimeout(finalizeStreamBubble, 1800);
-  }
-
-  function finalizeStreamBubble() {
-    if (turnEndSafetyTimer) {
-      clearTimeout(turnEndSafetyTimer);
-      turnEndSafetyTimer = null;
-    }
-    if (!activeStreamRow) return;
-    const finish = () => {
-      if (streamTimer) {
-        clearInterval(streamTimer);
-        streamTimer = null;
-      }
-      streamShownCount = streamTargetWords.length;
-      renderStreamProgress();
-      if (turnQuickReplies.length > 0 && chatMessagesEl) {
-        const qrWrap = document.createElement("div");
-        qrWrap.className = "jana-msg-quick-replies";
-        turnQuickReplies.forEach((qr) => {
-          const title = qr.title || qr.text || qr.payload;
-          const payload = qr.payload || title;
-          if (!title) return;
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "jana-qr-btn";
-          btn.textContent = title;
-          btn.addEventListener("click", () => {
-            qrWrap.remove();
-            sendChatMessage(title, payload);
-          });
-          qrWrap.appendChild(btn);
-        });
-        chatMessagesEl.appendChild(qrWrap);
-        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-      }
-      activeStreamRow = null;
-      activeStreamBubble = null;
-      streamTargetWords = [];
-      streamShownCount = 0;
-      turnQuickReplies = [];
-    };
-
-    // Let remaining words finish streaming smoothly, then finalize
-    const remaining = streamTargetWords.length - streamShownCount;
-    if (remaining > 0 && remaining <= 25) {
-      setTimeout(finish, remaining * 34);
-    } else {
-      finish();
+    if (turnTextParts.length === 0) return;
+    const combined = turnTextParts.join(" ").replace(/\s+([.,!?])/g, "$1").trim();
+    const qrs = turnQuickReplies.slice();
+    turnTextParts = [];
+    turnQuickReplies = [];
+    if (combined) {
+      appendChatMessage("bot", combined, qrs);
     }
   }
 
@@ -477,7 +372,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (cleaned) {
-        pushStreamChunk(cleaned, quickReplies);
+        turnTextParts.push(cleaned);
+        if (quickReplies.length > 0) {
+          turnQuickReplies = turnQuickReplies.concat(quickReplies);
+        }
+        if (turnFlushTimer) clearTimeout(turnFlushTimer);
+        turnFlushTimer = setTimeout(flushTurnBubble, 900);
       }
 
       const dhlMeta = data && data.data && data.data.dhlMetadata;
@@ -504,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     socket.on("finalPing", () => {
-      finalizeStreamBubble();
+      flushTurnBubble();
       setTyping(false);
     });
 
